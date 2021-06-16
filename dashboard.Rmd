@@ -4,11 +4,16 @@ author: "Sven Nekula, Minke Preckel, Joshua Simon"
 date: "15 6 2021"
 output: html_document
 runtime: shiny
+bibliography: literature.bib
+link-citations: yes
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+Placeholder [@WICKHAM.2021]
+
 
 This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
 
@@ -56,4 +61,4 @@ You can also use the `shinyApp` function to define an application inline rather 
 In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
 
 
-
+# References
