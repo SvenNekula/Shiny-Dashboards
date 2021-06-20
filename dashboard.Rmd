@@ -12,53 +12,55 @@ link-citations: yes
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Placeholder [@WICKHAM.2021]
+# 1. Introduction - What is Shiny?
 
+Shiny is an R package that allows the user to create interactive web apps. Just like other [popular R packages](https://www.rstudio.com/products/rpackages/){target="_blank"}, including the tidyverse packages, it was created by members of the RStudio team and was first released as version 0.2.3 on December 1st 2012. The most current version is 1.6.0 and was released on January 25th 2021. Further information on the current and past versions can be found [here](https://www.rdocumentation.org/packages/shiny/versions/1.6.0){target="_blank"}.
 
-This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+Before the package was released, it was more difficult for R users to create web apps, because it required knowledge of HTML, CSS and JavaScript. It also required the user to carefully analyze the interaction flows and dependencies of their code to prevent unrelated outputs to change, when some input changes.
+Shiny solves those problems by providing user interface (UI) functions that generate the needed HTML, CSS and JavaScript, which means that the user doesn't have to have any knowledge on these, if they don't want to go beyond the provided basics.
+It also introduced a new style of programming. **_Reactive programming_** keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes [@WICKHAM.2021].
 
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data their interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
 
-## Inputs and Outputs
+## Motivation etc - PLACEHOLDER
 
-You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+# 2. Structure of a Shiny app
 
-```{r eruptions, echo=FALSE}
-inputPanel(
-  selectInput("n_breaks", label = "Number of bins:",
-              choices = c(10, 20, 35, 50), selected = 20),
-  
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 0.2, max = 2, value = 1, step = 0.2)
-)
+In this section we will show the structure behind apps that are created with Shiny. Before users can start to work with Shiny, they have to install and load the package.
 
-renderPlot({
-  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
-       xlab = "Duration (minutes)", main = "Geyser eruption duration")
-  
-  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
-  lines(dens, col = "blue")
-})
+```{r, message=FALSE, warning=FALSE}
+# Installing Shiny
+if (!require("shiny")) install.packages("shiny")
+
+# Loading Shiny
+library(shiny)
 ```
 
-## Embedded Application
+## 2.1 Adding controls - UI
 
-It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI Layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
 
-```{r tabsets, echo=FALSE}
-shinyAppDir(
-  system.file("examples/06_tabsets", package = "shiny"),
-  options = list(
-    width = "100%", height = 550
-  )
-)
+The second group of functions are the UI Input functions. These functions are used to create user interface elements that prompt the user for input values or interaction, such as checkboxes, sliders or drop-down menus for example.
+
+```{r, echo=FALSE}
+checkboxInput("example1", "checkbox", FALSE)
+selectInput("example2", label = "drop-down-menu",
+              choices = c("A", "B", "C", "D"), selected = "A")
+sliderInput("example3", label = "slider",
+              min = 0, max = 2, value = 1, step = 0.1)
 ```
 
-Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+The last group of functions are the UI output functions. They create user interface elements that, in conjunction from server side rendering function display different kinds of output from the application, like plots or tables.
 
-You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+## 2.2 Adding behavoir - server
 
-In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+The server function brings the output of the app to life by telling shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}.
+
+#### Extra: Using Shiny in documents - interactive documents
+
+There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019]
+
+# 3. Examples
 
 
 # References
