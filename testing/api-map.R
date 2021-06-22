@@ -48,7 +48,7 @@ server <- function(input, output) {
     #leaflet map
     leaflet(geodata) %>% 
       addTiles() %>% 
-      addPolygons(stroke = F, smoothFactor = 0.2, fillOpacity = 0.5,
+      addPolygons(stroke = F, smoothFactor = 0.2, fillOpacity = 0.3,
                   color = ~pal(cases7_per_100k)
       ) %>% 
       addLegend(position = "topright", pal = pal, values = ~cases7_bl_per_100k,
