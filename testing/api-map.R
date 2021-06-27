@@ -1,6 +1,7 @@
 library(shiny)
 library(sf)
 library(leaflet)
+library(tidyverse)
 library(RColorBrewer)
 library(htmltools)
 
@@ -15,23 +16,86 @@ pal <-colorNumeric(
 
 
 #labels for polygons
-labs <- as.list(paste0("<b>Infos</b> <br>", 
+labs <- as.list(paste0("<b>Informations</b> <br>", 
                        "<b>Name:</b> ", geodata$GEN, "<br>",
-                       "<b>Einwohnerzahl:</b> ", geodata$EWZ, "<br>",
-                       "<b>Bundesland:</b> ", geodata$BL, "<br>",
-                       "<b>7-Tages-Inzidenzwert:</b> ", round(geodata$cases7_per_100k,2), "<br>",
-                       "<b>Fälle (insg.):</b> ", geodata$cases, "<br>",
-                       "<b>Todesfälle (insg.):</b> ", geodata$deaths))
+                       "<b>Population:</b> ", geodata$EWZ, "<br>",
+                       "<b>State:</b> ", geodata$BL, "<br>",
+                       "<b>Cases per 100.000 (7 Days):</b> ", round(geodata$cases7_per_100k,2), "<br>",
+                       "<b>Cases (total):</b> ", geodata$cases, "<br>",
+                       "<b>Deaths (total):</b> ", geodata$deaths))
 
+#Data for plots etc.
+#overview
+str(geodata)
+
+#Bundeslaender für selectInput()
+bl <- sort(unique(geodata$BL))
+
+#Shiny App
 ui <- fluidPage(
   
   # Application title
-  titlePanel("COVID-19 in Deutschland"),
+  titlePanel("COVID-19 in Germany"),
   
   #PLACEHOLDER
   sidebarLayout(
     sidebarPanel(
-      checkboxInput("placeholder", "PLACEHOLDER", FALSE)
+      selectInput("region", 
+                  label = "Choose a region of Germany", 
+                  choices = c("Germany (total)", bl),
+                  selected = "Germany (total)"
+                  ),
+      conditionalPanel(
+        condition = "input.region == 'Germany (total)'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Baden-Württemberg'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Bayern'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Berlin'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Brandenburg'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Bremen'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Hamburg'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Hessen'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Mecklenburg-Vorpommern'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Niedersachsen'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Nordrhein-Westfalen'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Rheinland-Pfalz'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Saarland'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Sachsen'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Sachsen-Anhalt'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Schleswig-Holstein'" 
+      ),
+      conditionalPanel(
+        condition = "input.region == 'Thüringen'" 
+      ),
     ),
     
     
@@ -55,7 +119,8 @@ server <- function(input, output) {
                 title = "7-Tages-Inzidenzwerte"
       ) %>% 
       addPolygons(stroke = T, weight = 0.5, color = "black", 
-                  label = lapply(labs, HTML))
+                  label = lapply(labs, HTML),
+                  labelOptions = labelOptions(textsize = "12px"))
   })
 }
 
