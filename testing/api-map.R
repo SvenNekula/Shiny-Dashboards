@@ -26,10 +26,15 @@ labs <- as.list(paste0("<b>Informations</b> <br>",
 
 #Data for plots etc.
 #overview
-str(geodata)
+#str(geodata)
 
 #Bundeslaender für selectInput()
 bl <- sort(unique(geodata$BL))
+
+#subset geodata for easier use
+gdata <- geodata %>% select(c(BL, EWZ_BL, GEN, EWZ, cases, 
+                              cases_per_100k, cases7_per_100k, 
+                              death_rate,  deaths))
 
 #Shiny App
 ui <- fluidPage(
@@ -38,69 +43,88 @@ ui <- fluidPage(
   titlePanel("COVID-19 in Germany"),
   
   #PLACEHOLDER
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("region", 
+  fluidRow(
+    column(3,
+            selectInput("region", 
                   label = "Choose a region of Germany", 
                   choices = c("Germany (total)", bl),
                   selected = "Germany (total)"
-                  ),
-      conditionalPanel(
-        condition = "input.region == 'Germany (total)'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Baden-Württemberg'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Bayern'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Berlin'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Brandenburg'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Bremen'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Hamburg'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Hessen'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Mecklenburg-Vorpommern'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Niedersachsen'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Nordrhein-Westfalen'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Rheinland-Pfalz'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Saarland'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Sachsen'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Sachsen-Anhalt'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Schleswig-Holstein'" 
-      ),
-      conditionalPanel(
-        condition = "input.region == 'Thüringen'" 
-      ),
+                  )
+    )
+  ),
+  fluidRow(
+    column(4,
+           conditionalPanel(
+             condition = "input.region == 'Germany (total)'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Baden-Württemberg'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Bayern'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Berlin'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Brandenburg'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Bremen'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Hamburg'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Hessen'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Mecklenburg-Vorpommern'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Niedersachsen'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Nordrhein-Westfalen'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Rheinland-Pfalz'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Saarland'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Sachsen'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Sachsen-Anhalt'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Schleswig-Holstein'" 
+           ),
+           conditionalPanel(
+             condition = "input.region == 'Thüringen'" 
+           ),
+           plotOutput("c7_hi"
+           )
     ),
-    
-    
-    mainPanel(
-      leafletOutput("c19map")
+    column(4,
+           plotOutput("c_hi"
+           ),
+           plotOutput("c_lo"
+           )      
+    ),
+    column(4,
+           plotOutput("d_hi"
+           ),
+           plotOutput("d_lo"
+           )
+    )
+  ),
+  
+  fluidRow(
+    column(12,
+           leafletOutput("c19map")
     )
   )
 )
@@ -122,6 +146,113 @@ server <- function(input, output) {
                   label = lapply(labs, HTML),
                   labelOptions = labelOptions(textsize = "12px"))
   })
+  
+  output$c7_hi <- renderPlot({
+    #plot of LKs with highest c7/100k
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(GEN, -cases7_per_100k), y=cases7_per_100k)) + 
+        geom_col()
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(GEN, -cases7_per_100k), y=cases7_per_100k)) + 
+          geom_col()
+      }
+    }
+  })
+  
+  output$c_hi <- renderPlot({
+    #plot of LKs with highest cases
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(desc(cases)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(GEN, -cases), y=cases)) + 
+        geom_col()
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(GEN, -cases), y=cases)) + 
+          geom_col()
+      }
+    }
+  })
+  
+  output$c_lo <- renderPlot({
+    #plot of LKs with lowest cases
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(cases) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(GEN, cases), y=cases)) + 
+        geom_col()
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(cases) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(GEN, cases), y=cases)) + 
+          geom_col()
+      }
+    }
+  })
+  
+  output$d_hi <- renderPlot({
+    #plot of LKs with highest deaths
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(desc(deaths)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(GEN, -deaths), y=deaths)) + 
+        geom_col()
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(deaths)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(GEN, -deaths), y=deaths)) + 
+          geom_col()
+      }
+    }
+  })
+  
+  output$d_lo <- renderPlot({
+    #plot of LKs with lowest deaths
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(deaths) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(GEN, deaths), y=deaths)) + 
+        geom_col()
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(deaths) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(GEN, deaths), y=deaths)) + 
+          geom_col()
+      }
+    }
+  })
+  
+  
 }
 
 # Run the application 
