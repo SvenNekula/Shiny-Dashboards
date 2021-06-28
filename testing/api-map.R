@@ -5,7 +5,43 @@ library(tidyverse)
 library(RColorBrewer)
 library(htmltools)
 
-geodata <- read_sf("https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson")
+
+load_geodata <- function(url, save_flag=FALSE) {
+  # Try to read geo data from the provided URL.
+  # If reading fails, an older local copy is used.
+  # Set save_flag = TRUE to replace the local copy
+  # with newer data.
+  tryCatch(
+    expr = {
+      geodata <<- read_sf(geodata_url)
+    }, 
+    error = function(e) {
+      print(paste0("Error: Failed to read data from online source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    },
+    warning = function(w) {
+      print(paste0("Warning: Failed to parse data from JSON source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    }
+  )
+  
+  if (save_flag) {
+    # Saving data object in RData format.
+    save(geodata, file = "geodata.RData")
+  }
+}
+
+
+# Get geo data from online source.
+geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson"
+load_geodata(geodata_url, save_flag = FALSE)
+
 
 #color-palette for polygons
 pal <-colorNumeric(
