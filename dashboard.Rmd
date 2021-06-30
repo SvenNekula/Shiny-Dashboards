@@ -20,7 +20,7 @@ Before the package was released, it was more difficult for R users to create web
 Shiny solves those problems by providing user interface (UI) functions that generate the needed HTML, CSS and JavaScript, which means that the user doesn't have to have any knowledge on these, if they don't want to go beyond the provided basics.
 It also introduced a new style of programming. **_Reactive programming_** keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes [@WICKHAM.2021].
 
-Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data their interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
+Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
 
 ## Motivation etc - PLACEHOLDER
 
@@ -52,16 +52,20 @@ sliderInput("example3", label = "slider",
 
 The last group of functions are the UI output functions. They create user interface elements that, in conjunction from server side rendering function display different kinds of output from the application, like plots or tables.
 
-## 2.2 Adding behavoir - server
+## 2.2 Adding behavior - server
 
-The server function brings the output of the app to life by telling shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}.
+The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}.
 
 #### Extra: Using Shiny in documents - interactive documents
 
 There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019]
 
+## 2.3 Deploying the app
+
 # 3. Examples
 
 Placeholder123
+
+# 4. Conclusion
 
 # References
