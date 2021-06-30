@@ -58,7 +58,7 @@ ui <- fluidPage(
                     "t_DF",
                     "Degrees of freedom",
                     1,
-                    100,
+                    10,
                     1,
                     step = 1)
             )
