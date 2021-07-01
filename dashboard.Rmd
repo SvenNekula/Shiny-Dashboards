@@ -36,6 +36,25 @@ if (!require("shiny")) install.packages("shiny")
 library(shiny)
 ```
 
+A Shiny app essentially consists of two components, each of which can be implemented as a function in R. The first one being the UI function containing everything in terms of app layout, themes and control elements. This part of the app will be covered in section 2.1. The second part of a Shiny app consists of yet another function, the so called server function. All server-side tasks are carried out here. This includes, for example, generating outputs and handling user inputs. Section 2.2 deals with this part of the app. The code of these two components can be placed inside a single file, <code>app.R</code>. This file must return an object created by the<code>shinyApp()</code> function. However, for larger applications an individual <code>ui.R</code> and <code>server.R</code> file can be used, to give the code base a cleaner structure. The following examples shows the code layout and function calls for a standalone Shiny app implemented in a single <code>app.R</code> file.
+
+```{r, results='hide', message=FALSE, warning=FALSE}
+# Define UI for application. 
+# Here, a fluid Page layout is used.
+ui <- fluidPage(
+  # code for ui layout
+)
+
+# Define server logic as function of inputs and outputs.
+server <- function(input, output) {
+  # code for server logic
+}
+
+# Run the shiny application.
+shinyApp(ui = ui, server = server)
+
+```
+
 ## 2.1 Adding controls - UI
 
 There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI Layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
@@ -61,6 +80,8 @@ The server function brings the output of the app to life by telling Shiny how to
 There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019]
 
 ## 2.3 Deploying the app
+
+After one has completed the work on an app, the question of how the software can go into production in order to reach the users must be answered. Shiny and RStudio are therefore offering a few solutions. The simplest way of running a R Shiny app is by doing it localy on your own computer. Here, a R and Shiny installation are requiered. A more common solution is to deploy the Shiny app to the web. The advantages of this option are that one can reach a larger target group and that end users only need a web browser to run the app. Rolling out on a server can be done using the ShinyServer software from RStudio. A Linux server or cloud-based Linux server is required for this. A simpler solution can be achivied via Shinyapps.io, a cloud hosting services by RStudio. This has the advantage that the developer doesn't need to take care of the hardware and the installation of the server. Only the app code needs to be transferred to the Shinyapps.io service. There are different price models for this deploying method - including a free solution. More on this topic can be found here: https://shiny.rstudio.com/deploy/
 
 # 3. Examples
 
