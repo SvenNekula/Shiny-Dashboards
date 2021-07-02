@@ -74,100 +74,83 @@ gdata <- geodata %>% as_tibble() %>%
            cases7_per_100k, death_rate,  deaths))
 
 #Shiny App
-ui <- fluidPage(
-  
-  # Application title
-  titlePanel("COVID-19 in Germany"),
-  
-  #PLACEHOLDER
-  fluidRow(
-    column(3,
-            selectInput("region", 
-                  label = "Choose a region of Germany", 
-                  choices = c("Germany (total)", bl),
-                  selected = "Germany (total)"
-                  )
-    )
-  ),
-  fluidRow(
-    column(4,
-           conditionalPanel(
-             condition = "input.region == 'Germany (total)'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Baden-Württemberg'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Bayern'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Berlin'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Brandenburg'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Bremen'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Hamburg'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Hessen'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Mecklenburg-Vorpommern'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Niedersachsen'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Nordrhein-Westfalen'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Rheinland-Pfalz'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Saarland'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Sachsen'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Sachsen-Anhalt'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Schleswig-Holstein'" 
-           ),
-           conditionalPanel(
-             condition = "input.region == 'Thüringen'" 
-           ),
-           plotOutput("c7_hi"
-           )
-    ),
-    column(4,
-           plotOutput("c_hi"
-           ),
-           plotOutput("c_lo"
-           )      
-    ),
-    column(4,
-           plotOutput("d_hi"
-           ),
-           plotOutput("d_lo"
-           )
-    )
-  ),
-  
-  fluidRow(
-    column(6,
-           leafletOutput("c19map")
-    ),
-    column(6,
-           DTOutput("tbl")
-    )
-  )
+ui <- navbarPage("Covid-19 in Germany",
+                 tabPanel("Map",
+                          fillPage(
+                            leafletOutput("c19map")
+                            )
+                          ),
+                 tabPanel("Table",
+                          fillPage(
+                            DTOutput("tbl")
+                            )
+                          ),
+                 tabPanel("Plots",
+                          fluidRow(
+                            column(3,
+                                   selectInput("region", 
+                                               label = "Choose a region of Germany", 
+                                               choices = c("Germany (total)", bl),
+                                               selected = "Germany (total)"))
+                            ),
+                          fluidRow(column(4,
+                                          plotOutput("c7_hi")),
+                                   column(4,
+                                          plotOutput("c_hi"),
+                                          plotOutput("c_lo")),
+                                   column(4,
+                                          plotOutput("d_hi"),
+                                          plotOutput("d_lo"))
+                                   )
+                          )
+
 )
+
+
+
+# ui <- fluidPage(
+#   
+#   # Application title
+#   titlePanel("COVID-19 in Germany"),
+#   
+#   #PLACEHOLDER
+#   fluidRow(
+#     column(3,
+#             selectInput("region", 
+#                   label = "Choose a region of Germany", 
+#                   choices = c("Germany (total)", bl),
+#                   selected = "Germany (total)"
+#                   )
+#     )
+#   ),
+#   fluidRow(
+#     column(4,
+#            plotOutput("c7_hi"
+#            )
+#     ),
+#     column(4,
+#            plotOutput("c_hi"
+#            ),
+#            plotOutput("c_lo"
+#            )      
+#     ),
+#     column(4,
+#            plotOutput("d_hi"
+#            ),
+#            plotOutput("d_lo"
+#            )
+#     )
+#   ),
+#   
+#   fluidRow(
+#     column(6,
+#            leafletOutput("c19map")
+#     ),
+#     column(6,
+#            DTOutput("tbl")
+#     )
+#   )
+# )
 
 
 server <- function(input, output) {
