@@ -5,6 +5,7 @@ library(tidyverse)
 library(RColorBrewer)
 library(htmltools)
 library(DT)
+library(shinythemes)
 
 
 load_geodata <- function(url, save_flag=FALSE) {
@@ -74,7 +75,8 @@ gdata <- geodata %>% as_tibble() %>%
            cases7_per_100k, death_rate,  deaths))
 
 #Shiny App
-ui <- navbarPage("Covid-19 in Germany",
+ui <- navbarPage(theme = shinytheme("flatly"), 
+                 "Covid-19 in Germany",
                  tabPanel("Map",
                           fillPage(
                             leafletOutput("c19map")
