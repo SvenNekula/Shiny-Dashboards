@@ -108,51 +108,6 @@ ui <- navbarPage("Covid-19 in Germany",
 
 
 
-# ui <- fluidPage(
-#   
-#   # Application title
-#   titlePanel("COVID-19 in Germany"),
-#   
-#   #PLACEHOLDER
-#   fluidRow(
-#     column(3,
-#             selectInput("region", 
-#                   label = "Choose a region of Germany", 
-#                   choices = c("Germany (total)", bl),
-#                   selected = "Germany (total)"
-#                   )
-#     )
-#   ),
-#   fluidRow(
-#     column(4,
-#            plotOutput("c7_hi"
-#            )
-#     ),
-#     column(4,
-#            plotOutput("c_hi"
-#            ),
-#            plotOutput("c_lo"
-#            )      
-#     ),
-#     column(4,
-#            plotOutput("d_hi"
-#            ),
-#            plotOutput("d_lo"
-#            )
-#     )
-#   ),
-#   
-#   fluidRow(
-#     column(6,
-#            leafletOutput("c19map")
-#     ),
-#     column(6,
-#            DTOutput("tbl")
-#     )
-#   )
-# )
-
-
 server <- function(input, output) {
   
   output$c19map <- renderLeaflet({
