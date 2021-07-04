@@ -90,13 +90,14 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                           ),
                  tabPanel("Plots",
                           fluidRow(
-                            column(3,
+                            column(6,
                                    selectInput("region", 
-                                               label = "Choose a region of Germany", 
+                                               label = "Choose a state of Germany", 
                                                choices = c("Germany (total)", bl),
                                                selected = "Germany (total)"))
                             ),
                           fluidRow(column(4,
+                                          plotOutput("piechart"),
                                           plotOutput("c7_hi")),
                                    column(4,
                                           plotOutput("c_hi"),
@@ -121,7 +122,7 @@ server <- function(input, output) {
                   color = ~pal(cases7_per_100k)
       ) %>% 
       addLegend(position = "topright", pal = pal, values = ~cases7_bl_per_100k,
-                title = "Cases per 100.000 (last 7 days) </br> '7-Tages-Inzidenzwerte'"
+                title = "Cases per 100.000 (last 7 days) </br> '7-day-incidence'"
       ) %>% 
       addPolygons(stroke = T, weight = 0.5, color = "black", 
                   label = lapply(labs, HTML),
@@ -136,6 +137,22 @@ server <- function(input, output) {
                            "Deaths", "Deathrate"))
   })
   
+  
+  output$piechart <- renderPlot({
+    gdata %>% 
+      group_by(BL) %>% 
+      summarise(cases_sum = sum(cases)) %>% 
+      ggplot(., aes(x="", y=cases_sum, fill=BL)) + 
+      geom_bar(stat = "identity", width=1, color="black") +
+      coord_polar("y", start = 0) + 
+      theme_void() + 
+      theme(legend.position = "left",
+            legend.title = element_text(size = 10),
+            legend.text = element_text(size = 10)) +
+      labs(fill = "State")
+  })
+  
+  
   output$c7_hi <- renderPlot({
     #plot of LKs with highest c7/100k
     if (input$region == "Germany (total)"){
@@ -148,9 +165,10 @@ server <- function(input, output) {
         theme_classic() +
         theme(axis.text.x=element_text(angle=60,hjust=1)) +
         labs(title = "Cases per 100.000 (last 7 days)",
-             subtitle = "Counties with the highest number of cases \n per 100.000",  
+             subtitle = "Counties with the highest 7-day-incidence",  
              x="County", 
-             y="", fill="Cases per 100.000")
+             y="", fill="Cases per 100.000") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
     } else {
       bundesland <- input$region
       if (input$region == bundesland){
@@ -164,9 +182,10 @@ server <- function(input, output) {
           theme_classic() +
           theme(axis.text.x=element_text(angle=60,hjust=1)) +
           labs(title = "Cases per 100.000 (last 7 days)",
-               subtitle = "Counties with the highest number of cases \n per 100.000", 
+               subtitle = "Counties with the highest 7-day-incidence", 
                x="County", 
-               y="", fill="Cases per 100.000")
+               y="", fill="Cases per 100.000") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
       }
     }
   })
@@ -185,7 +204,8 @@ server <- function(input, output) {
         labs(title = "Cases (total)",
              subtitle = "Counties with the highest number of cases", 
              x="County", 
-             y="", fill="Total cases")
+             y="", fill="Total cases") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
     } else {
       bundesland <- input$region
       if (input$region == bundesland){
@@ -201,7 +221,8 @@ server <- function(input, output) {
           labs(title = "Cases (total)",
                subtitle = "Counties with the highest number of cases", 
                x="County", 
-               y="", fill="Total cases")
+               y="", fill="Total cases") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
       }
     }
   })
@@ -220,7 +241,8 @@ server <- function(input, output) {
         labs(title = "Cases (total)",
              subtitle = "Counties with the lowest number of cases", 
              x="County", 
-             y="", fill="Total cases")
+             y="", fill="Total cases") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
     } else {
       bundesland <- input$region
       if (input$region == bundesland){
@@ -236,7 +258,8 @@ server <- function(input, output) {
           labs(title = "Cases (total)",
                subtitle = "Counties with the lowest number of cases", 
                x="County", 
-               y="", fill="Total cases")
+               y="", fill="Total cases") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
       }
     }
   })
@@ -255,7 +278,8 @@ server <- function(input, output) {
         labs(title = "Deaths (total)",
              subtitle = "Counties with the highest number of deaths", 
              x="County", 
-             y="", fill="Total deaths")
+             y="", fill="Total deaths") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
     } else {
       bundesland <- input$region
       if (input$region == bundesland){
@@ -270,7 +294,8 @@ server <- function(input, output) {
           theme(axis.text.x=element_text(angle=60,hjust=1)) +
           labs(title = "Deaths (total)",
                subtitle = "Counties with the highest number of deaths", x="County", 
-               y="", fill="Total deaths")
+               y="", fill="Total deaths") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
       }
     }
   })
@@ -289,7 +314,8 @@ server <- function(input, output) {
         labs(title = "Deaths (total)",
              subtitle = "Counties with the lowest number of deaths", 
              x="County", 
-             y="", fill="Total deaths")
+             y="", fill="Total deaths") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
     } else {
       bundesland <- input$region
       if (input$region == bundesland){
@@ -305,7 +331,8 @@ server <- function(input, output) {
           labs(title = "Deaths (total)",
                subtitle = "Counties with the lowest number of deaths", 
                x="County", 
-               y="", fill="Total deaths")
+               y="", fill="Total deaths") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
       }
     }
   })
