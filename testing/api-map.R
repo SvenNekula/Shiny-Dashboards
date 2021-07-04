@@ -71,7 +71,7 @@ bl <- sort(unique(geodata$BL))
 
 #subset geodata for easier use
 gdata <- geodata %>% as_tibble() %>% 
-  select(c(BL, EWZ_BL, GEN, EWZ, cases, cases_per_100k, 
+  select(c(BL, EWZ_BL, BEZ, GEN, EWZ, cases, cases_per_100k, 
            cases7_per_100k, deaths, death_rate))
 
 #Shiny App
@@ -130,7 +130,7 @@ server <- function(input, output) {
   })
   
   output$tbl <- renderDT({
-    datatable(gdata %>% select(-2) %>% mutate(across(c(5,6,8), round, 2)),
+    datatable(gdata %>% select(c(-2,-3)) %>% mutate(across(c(5,6,8), round, 2)),
               rownames = F,
               colnames = c("State", "County", "Population", "Cases",
                            "Cases per 100.000", "Cases per 100.000 (last 7 days)", 
@@ -159,7 +159,7 @@ server <- function(input, output) {
       gdata %>% 
         arrange(desc(cases7_per_100k)) %>% 
         slice(1:5) %>% 
-        ggplot(., aes(x=reorder(GEN, -cases7_per_100k), y=cases7_per_100k)) + 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
         geom_col(aes(fill=cases7_per_100k)) + 
         scale_fill_distiller(palette = "Reds", direction = 1) +
         theme_classic() +
@@ -176,7 +176,7 @@ server <- function(input, output) {
           filter(BL == bundesland) %>% 
           arrange(desc(cases7_per_100k)) %>% 
           slice(1:5) %>% 
-          ggplot(., aes(x=reorder(GEN, -cases7_per_100k), y=cases7_per_100k)) + 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
           geom_col(aes(fill=cases7_per_100k)) + 
           scale_fill_distiller(palette = "Reds", direction = 1) +
           theme_classic() +
@@ -196,7 +196,7 @@ server <- function(input, output) {
       gdata %>% 
         arrange(desc(cases)) %>% 
         slice(1:5) %>% 
-        ggplot(., aes(x=reorder(GEN, -cases), y=cases)) + 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases), y=cases)) + 
         geom_col(aes(fill=cases)) +
         scale_fill_distiller(palette = "Reds", direction = 1) +
         theme_classic() +
@@ -213,7 +213,7 @@ server <- function(input, output) {
           filter(BL == bundesland) %>% 
           arrange(desc(cases)) %>% 
           slice(1:5) %>% 
-          ggplot(., aes(x=reorder(GEN, -cases), y=cases)) + 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases), y=cases)) + 
           geom_col(aes(fill=cases)) +
           scale_fill_distiller(palette = "Reds", direction = 1) +
           theme_classic() +
@@ -233,7 +233,7 @@ server <- function(input, output) {
       gdata %>% 
         arrange(cases) %>% 
         slice(1:5) %>% 
-        ggplot(., aes(x=reorder(GEN, cases), y=cases)) + 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), cases), y=cases)) + 
         geom_col(aes(fill=cases)) +
         scale_fill_distiller(palette = "Greens", direction = -1) +
         theme_classic() +
@@ -250,7 +250,7 @@ server <- function(input, output) {
           filter(BL == bundesland) %>% 
           arrange(cases) %>% 
           slice(1:5) %>% 
-          ggplot(., aes(x=reorder(GEN, cases), y=cases)) + 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), cases), y=cases)) + 
           geom_col(aes(fill=cases)) +
           scale_fill_distiller(palette = "Greens", direction = -1) +
           theme_classic() +
@@ -270,7 +270,7 @@ server <- function(input, output) {
       gdata %>% 
         arrange(desc(deaths)) %>% 
         slice(1:5) %>% 
-        ggplot(., aes(x=reorder(GEN, -deaths), y=deaths)) + 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -deaths), y=deaths)) + 
         geom_col(aes(fill=deaths)) +
         scale_fill_distiller(palette = "Reds", direction = 1) +
         theme_classic() +
@@ -287,7 +287,7 @@ server <- function(input, output) {
           filter(BL == bundesland) %>% 
           arrange(desc(deaths)) %>% 
           slice(1:5) %>% 
-          ggplot(., aes(x=reorder(GEN, -deaths), y=deaths)) + 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -deaths), y=deaths)) + 
           geom_col(aes(fill=deaths)) +
           scale_fill_distiller(palette = "Reds", direction = 1) +
           theme_classic() +
@@ -306,7 +306,7 @@ server <- function(input, output) {
       gdata %>% 
         arrange(deaths) %>% 
         slice(1:5) %>% 
-        ggplot(., aes(x=reorder(GEN, deaths), y=deaths)) + 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), deaths), y=deaths)) + 
         geom_col(aes(fill=deaths)) +
         scale_fill_distiller(palette = "Greens", direction = -1) +
         theme_classic() +
@@ -323,7 +323,7 @@ server <- function(input, output) {
           filter(BL == bundesland) %>% 
           arrange(deaths) %>% 
           slice(1:5) %>% 
-          ggplot(., aes(x=reorder(GEN, deaths), y=deaths)) + 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), deaths), y=deaths)) + 
           geom_col(aes(fill=deaths)) +
           scale_fill_distiller(palette = "Greens", direction = -1) +
           theme_classic() +
