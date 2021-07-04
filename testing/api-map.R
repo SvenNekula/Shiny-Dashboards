@@ -72,19 +72,20 @@ bl <- sort(unique(geodata$BL))
 #subset geodata for easier use
 gdata <- geodata %>% as_tibble() %>% 
   select(c(BL, EWZ_BL, GEN, EWZ, cases, cases_per_100k, 
-           cases7_per_100k, death_rate,  deaths))
+           cases7_per_100k, deaths, death_rate))
 
 #Shiny App
 ui <- navbarPage(theme = shinytheme("flatly"), 
                  "Covid-19 in Germany",
                  tabPanel("Map",
                           fillPage(
-                            leafletOutput("c19map")
+                            leafletOutput("c19map", height = 1000)
                             )
                           ),
                  tabPanel("Table",
-                          fillPage(
-                            DTOutput("tbl")
+                          fluidPage(
+                            DTOutput("tbl"),
+                            style = "height:1000px; overflow-y: scroll;overflow-x: scroll;"
                             )
                           ),
                  tabPanel("Plots",
@@ -120,7 +121,7 @@ server <- function(input, output) {
                   color = ~pal(cases7_per_100k)
       ) %>% 
       addLegend(position = "topright", pal = pal, values = ~cases7_bl_per_100k,
-                title = "7-Tages-Inzidenzwerte"
+                title = "Cases per 100.000 (last 7 days) </br> '7-Tages-Inzidenzwerte'"
       ) %>% 
       addPolygons(stroke = T, weight = 0.5, color = "black", 
                   label = lapply(labs, HTML),
@@ -128,7 +129,11 @@ server <- function(input, output) {
   })
   
   output$tbl <- renderDT({
-    gdata
+    datatable(gdata %>% select(-2) %>% mutate(across(c(5,6,8), round, 2)),
+              rownames = F,
+              colnames = c("State", "County", "Population", "Cases",
+                           "Cases per 100.000", "Cases per 100.000 (last 7 days)", 
+                           "Deaths", "Deathrate"))
   })
   
   output$c7_hi <- renderPlot({
