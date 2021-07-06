@@ -74,6 +74,21 @@ gdata <- geodata %>% as_tibble() %>%
   select(c(BL, EWZ_BL, BEZ, GEN, EWZ, cases, cases_per_100k, 
            cases7_per_100k, deaths, death_rate))
 
+#Get data for time series from online source
+#td <- read_sf("https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.geojson")
+
+#str(td)
+#subset td for easier use
+#sum(td$AnzahlFall)
+#sum(td$AnzahlTodesfall)
+#sum(td$AnzahlGenesen)
+
+#timeData <- td %>% as_tibble()
+#save(timeData, file = "timeData.RData")
+
+load("timeData.RData")
+
+
 #Shiny App
 ui <- navbarPage(theme = shinytheme("flatly"), 
                  "Covid-19 in Germany",
@@ -105,7 +120,36 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                    column(4,
                                           plotOutput("d_hi"),
                                           plotOutput("d_lo"))
-                                   )
+                            )
+                          ),
+                 tabPanel("Time series",
+                          sidebarLayout(
+                              sidebarPanel(
+                                selectInput("region2", 
+                                            label = "Choose a state of Germany", 
+                                            choices = c("Germany (total)", bl),
+                                            selected = "Germany (total)"),
+                              dateRangeInput("date",
+                                             label = "Choose dates",
+                                             start = "2021-03-01",
+                                             format = "yyyy-mm-dd",
+                                             min = "2021-03-01",
+                                             max = Sys.Date()
+                                             ),
+                              checkboxInput("cases",
+                                            label = "Show cases?",
+                                            value = T),
+                              checkboxInput("deaths",
+                                            label = "Show deaths?",
+                                            value = T),
+                              checkboxInput("recovered",
+                                            label = "Show recovered?",
+                                            value = T)
+                              ),
+                              mainPanel(
+                                plotOutput("timeSeries")
+                              )
+                            )
                           )
 
 )
