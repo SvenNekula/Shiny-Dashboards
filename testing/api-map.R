@@ -79,17 +79,13 @@ gdata <- geodata %>% as_tibble() %>%
 #Get data for time series from online source
 #request first
 request <- GET("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=Bundesland,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,Meldedatum,Refdatum,AnzahlGenesen&returnGeometry=false&outSR=4326&f=json")
+mycontent <- content(request, as = "text")
+fJcontent <- fromJSON(mycontent)
+glimpse(fJcontent)
+test_df <- fJcontent$features
+test_df2 <- test_df$attributes %>% as_tibble()
+head(test_df2)
 
-
-
-#directly fromJSON
-td <- fromJSON("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=Bundesland,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,Meldedatum,Refdatum,AnzahlGenesen&returnGeometry=false&outSR=4326&f=json")
-#Problem: transfer limit exceedet? only 25.000 observations
-testdata <- (td$features) %>% as_tibble()
-
-testdata$attributes
-
-testdata[2,]
 
 #Shiny App
 ui <- navbarPage(theme = shinytheme("flatly"), 
