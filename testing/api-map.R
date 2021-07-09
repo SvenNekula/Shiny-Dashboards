@@ -6,6 +6,8 @@ library(RColorBrewer)
 library(htmltools)
 library(DT)
 library(shinythemes)
+library(httr)
+library(jsonlite)
 
 
 load_geodata <- function(url, save_flag=FALSE) {
@@ -75,19 +77,19 @@ gdata <- geodata %>% as_tibble() %>%
            cases7_per_100k, deaths, death_rate))
 
 #Get data for time series from online source
-#td <- read_sf("https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.geojson")
+#request first
+request <- GET("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=Bundesland,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,Meldedatum,Refdatum,AnzahlGenesen&returnGeometry=false&outSR=4326&f=json")
 
-#str(td)
-#subset td for easier use
-#sum(td$AnzahlFall)
-#sum(td$AnzahlTodesfall)
-#sum(td$AnzahlGenesen)
 
-#timeData <- td %>% as_tibble()
-#save(timeData, file = "timeData.RData")
 
-load("timeData.RData")
+#directly fromJSON
+td <- fromJSON("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=Bundesland,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,Meldedatum,Refdatum,AnzahlGenesen&returnGeometry=false&outSR=4326&f=json")
+#Problem: transfer limit exceedet? only 25.000 observations
+testdata <- (td$features) %>% as_tibble()
 
+testdata$attributes
+
+testdata[2,]
 
 #Shiny App
 ui <- navbarPage(theme = shinytheme("flatly"), 
