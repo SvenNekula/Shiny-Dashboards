@@ -1,0 +1,68 @@
+---
+title: "dashboard_static"
+author: "Sven Nekula, Minke Preckel, Joshua Simon"
+date: "13 7 2021"
+output: html_document
+bibliography: literature.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Introduction - What is Shiny?
+
+Shiny is an R package that allows the user to create interactive web apps. Just like other [popular R packages](https://www.rstudio.com/products/rpackages/){target="_blank"}, including the tidyverse packages, it was created by members of the RStudio team and was first released as version 0.2.3 on December 1st 2012. The most current version is 1.6.0 and was released on January 25th 2021. Further information on the current and past versions can be found [here](https://www.rdocumentation.org/packages/shiny/versions/1.6.0){target="_blank"}.
+
+Before the package was released, it was more difficult for R users to create web apps. Either there was the possibility to work with the tcltk package which was announced in 2001 and is also a graphic user interface (GUI) but with [different shortcomings](https://www.r-project.org/conferences/DSC-2001/Proceedings/Dalgaard.pdf){target=”_blank”} or it required knowledge of HTML, CSS and JavaScript. Furthermore, this required the user to carefully analyze the interaction flows and dependencies of their code to prevent unrelated outputs to change, when some input changes.
+Shiny solves those problems by providing user interface (UI) functions that generate the needed HTML, CSS and JavaScript, which means that the user doesn't have to have any knowledge on these, if they don't want to go beyond the provided basics.
+It also introduced a new style of programming. **_Reactive programming_** keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes [@WICKHAM.2021].
+
+Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
+
+## Motivation etc - PLACEHOLDER
+
+# 2. Structure of a Shiny app
+
+In this section we will show the structure behind apps that are created with Shiny. Before users can start to work with Shiny, they have to install and load the package.
+
+```{r, message=FALSE, warning=FALSE}
+# Installing Shiny
+if (!require("shiny")) install.packages("shiny")
+
+# Loading Shiny
+library(shiny)
+```
+
+A Shiny app essentially consists of two components, each of which can be implemented as a function in R. The first one being the UI function containing everything in terms of app layout, themes and control elements. This part of the app will be covered in section 2.1. The second part of a Shiny app consists of yet another function, the so called server function. All server-side tasks are carried out here. This includes, for example, generating outputs and handling user inputs. Section 2.2 deals with this part of the app. The code of these two components can be placed inside a single file, <code>app.R</code>. This file must return an object created by the<code>shinyApp()</code> function. However, for larger applications an individual <code>ui.R</code> and <code>server.R</code> file can be used, to give the code base a cleaner structure. The following examples shows the code layout and function calls for a standalone Shiny app implemented in a single <code>app.R</code> file.
+
+
+## 2.1 Adding controls - UI
+
+There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI Layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
+
+The second group of functions are the UI Input functions. These functions are used to create user interface elements that prompt the user for input values or interaction, such as checkboxes, sliders or drop-down menus for example.
+
+
+The last group of functions are the UI output functions. They create user interface elements that, in conjunction from server side rendering function display different kinds of output from the application, like plots or tables.
+
+## 2.2 Adding behavior - server
+
+The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}.
+
+#### Extra: Using Shiny in documents - interactive documents
+
+There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019]
+
+## 2.3 Deploying the app
+
+After one has completed the work on an app, the question of how the software can go into production in order to reach the users must be answered. Shiny and RStudio are therefore offering a few solutions. The simplest way of running a R Shiny app is by doing it locally on your own computer. Here, a R and Shiny installation are required. A more common solution is to deploy the Shiny app to the web. The advantages of this option are that one can reach a larger target group and that end users only need a web browser to run the app. Rolling out on a server can be done using the ShinyServer software from RStudio. A Linux server or cloud-based Linux server is required for this. A simpler solution can be achieved via Shinyapps.io, a cloud hosting services by RStudio. This has the advantage that the developer doesn't need to take care of the hardware and the installation of the server. Only the app code needs to be transferred to the Shinyapps.io service. There are different price models for this deploying method - including a free solution. More on this topic can be found [here](https://shiny.rstudio.com/deploy/){target="_blank"}.
+
+# 3. Examples
+
+Placeholder123
+
+# 4. Conclusion
+
+# References

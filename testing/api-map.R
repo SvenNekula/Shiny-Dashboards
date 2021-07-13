@@ -126,6 +126,7 @@ server <- function(input, output) {
   })
   
   output$tbl <- renderDT({
+    #interactive data table
     datatable(gdata %>% select(c(-2,-3)) %>% mutate(across(c(5,6,8), round, 2)),
               rownames = F,
               colnames = c("State", "County", "Population", "Cases",
@@ -135,6 +136,7 @@ server <- function(input, output) {
   
   
   output$piechart <- renderPlot({
+    #piechart
     gdata %>% 
       group_by(BL) %>% 
       summarise(cases_sum = sum(cases)) %>% 
