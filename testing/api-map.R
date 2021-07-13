@@ -143,7 +143,7 @@ server <- function(input, output) {
       group_by(BL) %>% 
       summarise(cases_sum = sum(cases)) %>% 
       ggplot(., aes(x="", y=cases_sum, fill=BL)) + 
-      geom_bar(stat = "identity", width=1, color="black") +
+      geom_bar(stat = "identity", color="black") +
       coord_polar("y", start = 0) + 
       theme_void() + 
       theme(legend.position = "left",
