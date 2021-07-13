@@ -62,11 +62,8 @@ labs <- as.list(paste0("<b>Informations</b> <br>",
                        "<b>Cases (total):</b> ", geodata$cases, "<br>",
                        "<b>Deaths (total):</b> ", geodata$deaths))
 
-#Data for plots etc.
-#overview
-#str(geodata)
 
-#Bundeslaender für selectInput()
+#Bundeslaender for selectInput()
 bl <- sort(unique(geodata$BL))
 
 #subset geodata for easier use
@@ -105,9 +102,8 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                    column(4,
                                           plotOutput("d_hi"),
                                           plotOutput("d_lo"))
-                                   )
+                            )
                           )
-
 )
 
 
