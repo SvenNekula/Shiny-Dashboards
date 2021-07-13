@@ -6,8 +6,6 @@ library(RColorBrewer)
 library(htmltools)
 library(DT)
 library(shinythemes)
-library(httr)
-library(jsonlite)
 
 
 load_geodata <- function(url, save_flag=FALSE) {
@@ -64,28 +62,14 @@ labs <- as.list(paste0("<b>Informations</b> <br>",
                        "<b>Cases (total):</b> ", geodata$cases, "<br>",
                        "<b>Deaths (total):</b> ", geodata$deaths))
 
-#Data for plots etc.
-#overview
-#str(geodata)
 
-#Bundeslaender für selectInput()
+#Bundeslaender for selectInput()
 bl <- sort(unique(geodata$BL))
 
 #subset geodata for easier use
 gdata <- geodata %>% as_tibble() %>% 
   select(c(BL, EWZ_BL, BEZ, GEN, EWZ, cases, cases_per_100k, 
            cases7_per_100k, deaths, death_rate))
-
-#Get data for time series from online source
-#request first
-request <- GET("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=Bundesland,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,Meldedatum,Refdatum,AnzahlGenesen&returnGeometry=false&outSR=4326&f=json")
-mycontent <- content(request, as = "text")
-fJcontent <- fromJSON(mycontent)
-glimpse(fJcontent)
-test_df <- fJcontent$features
-test_df2 <- test_df$attributes %>% as_tibble()
-head(test_df2)
-
 
 #Shiny App
 ui <- navbarPage(theme = shinytheme("flatly"), 
@@ -119,37 +103,7 @@ ui <- navbarPage(theme = shinytheme("flatly"),
                                           plotOutput("d_hi"),
                                           plotOutput("d_lo"))
                             )
-                          ),
-                 tabPanel("Time series",
-                          sidebarLayout(
-                              sidebarPanel(
-                                selectInput("region2", 
-                                            label = "Choose a state of Germany", 
-                                            choices = c("Germany (total)", bl),
-                                            selected = "Germany (total)"),
-                              dateRangeInput("date",
-                                             label = "Choose dates",
-                                             start = "2021-03-01",
-                                             format = "yyyy-mm-dd",
-                                             min = "2021-03-01",
-                                             max = Sys.Date()
-                                             ),
-                              checkboxInput("cases",
-                                            label = "Show cases?",
-                                            value = T),
-                              checkboxInput("deaths",
-                                            label = "Show deaths?",
-                                            value = T),
-                              checkboxInput("recovered",
-                                            label = "Show recovered?",
-                                            value = T)
-                              ),
-                              mainPanel(
-                                plotOutput("timeSeries")
-                              )
-                            )
                           )
-
 )
 
 
