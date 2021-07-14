@@ -138,16 +138,22 @@ server <- function(input, output) {
   output$piechart <- renderPlot({
     #piechart
     gdata %>% 
-      group_by(BL) %>% 
+      mutate(sumcases = sum(cases)) %>% 
+      mutate(BL = fct_lump_n(BL, n=5, w=sumcases)) %>% 
+      group_by(BL) %>%
       summarise(cases_sum = sum(cases)) %>% 
-      ggplot(., aes(x="", y=cases_sum, fill=BL)) + 
-      geom_bar(stat = "identity", color="black") +
-      coord_polar("y", start = 0) + 
+      mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>% 
+      ggplot(., aes(x="", y=percentage, fill=BL)) + 
+      geom_bar(stat = "identity") +
+      coord_polar("y", start = 0) +
       theme_void() + 
-      theme(legend.position = "left",
-            legend.title = element_text(size = 10),
-            legend.text = element_text(size = 10)) +
-      labs(fill = "State")
+      theme(legend.position = "bottom", legend.direction = "horizontal") +
+      scale_fill_brewer(palette = "Pastel2") +
+      geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                position = position_stack(vjust = 0.5), size=3) + 
+      labs(title = "Share of the states in total number of cases",
+           subtitle = "Top 5 and rest",
+           fill = "")
   })
   
   
