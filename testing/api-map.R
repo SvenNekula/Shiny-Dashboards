@@ -137,23 +137,44 @@ server <- function(input, output) {
   
   output$piechart <- renderPlot({
     #piechart
-    gdata %>% 
-      mutate(sumcases = sum(cases)) %>% 
-      mutate(BL = fct_lump_n(BL, n=5, w=sumcases)) %>% 
-      group_by(BL) %>%
-      summarise(cases_sum = sum(cases)) %>% 
-      mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>% 
-      ggplot(., aes(x="", y=percentage, fill=BL)) + 
-      geom_bar(stat = "identity") +
-      coord_polar("y", start = 0) +
-      theme_void() + 
-      theme(legend.position = "bottom", legend.direction = "horizontal") +
-      scale_fill_brewer(palette = "Pastel2") +
-      geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
-                position = position_stack(vjust = 0.5), size=3) + 
-      labs(title = "Share of the states in total number of cases",
-           subtitle = "Top 5 and rest",
-           fill = "")
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        mutate(sumcases = sum(cases)) %>% 
+        mutate(BL = fct_lump_n(BL, n=5, w=sumcases)) %>% 
+        group_by(BL) %>%
+        summarise(cases_sum = sum(cases)) %>% 
+        mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>% 
+        ggplot(., aes(x="", y=percentage, fill=BL)) + 
+        geom_bar(stat = "identity") +
+        coord_polar("y", start = 0) +
+        theme_void() + 
+        theme(legend.position = "bottom", legend.direction = "horizontal") +
+        scale_fill_brewer(palette = "Pastel2") +
+        geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                  position = position_stack(vjust = 0.5), size=3) + 
+        labs(title = "Percentage of the states in total number of cases",
+             subtitle = "Top 5 and rest",
+             fill = "")
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% mutate(BL = as.factor(ifelse(BL==bundesland, bundesland, "other"))) %>% 
+          group_by(BL) %>%
+          summarise(cases_sum = sum(cases)) %>% 
+          mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>%
+          ggplot(., aes(x="", y=percentage, fill=reorder(BL, percentage))) + 
+          geom_bar(stat = "identity") +
+          coord_polar("y", start = 0) +
+          theme_void() + 
+          theme(legend.position = "bottom", legend.direction = "horizontal") +
+          scale_fill_brewer(palette = "Pastel2") +
+          geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                    position = position_stack(vjust = 0.5), size=3) + 
+          labs(title = paste("Percentage of", bundesland, "in total number of cases"),
+               subtitle = "compared to all other states",
+               fill = "")
+      }
+    }
   })
   
   

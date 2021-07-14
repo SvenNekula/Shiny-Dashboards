@@ -77,7 +77,7 @@ The server function brings the output of the app to life by telling Shiny how to
 
 #### Extra: Using Shiny in documents - interactive documents
 
-There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019]
+There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019].
 
 ## 2.3 Deploying the app
 
@@ -85,7 +85,385 @@ After one has completed the work on an app, the question of how the software can
 
 # 3. Examples
 
-Placeholder123
+Shiny corona dashboard:
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+packages <- c("DT", "htmltools", "leaflet", "RColorBrewer", "sf", "shiny",
+              "shinythemes", "tidyverse")
+
+for (i in packages) { #Installs packages if not yet installed
+    if(! i %in% row.names(installed.packages())) install.packages(i)
+}
+
+library(DT)
+library(htmltools)
+library(leaflet)
+library(RColorBrewer)
+library(sf)
+library(shiny)
+library(shinythemes)
+library(tidyverse)
+
+load_geodata <- function(url, save_flag=FALSE) {
+  # Try to read geo data from the provided URL.
+  # If reading fails, an older local copy is used.
+  # Set save_flag = TRUE to replace the local copy
+  # with newer data.
+  tryCatch(
+    expr = {
+      geodata <<- read_sf(geodata_url)
+    }, 
+    error = function(e) {
+      print(paste0("Error: Failed to read data from online source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    },
+    warning = function(w) {
+      print(paste0("Warning: Failed to parse data from JSON source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    }
+  )
+  
+  if (save_flag) {
+    # Saving data object in RData format.
+    save(geodata, file = "geodata.RData")
+  }
+}
+
+
+# Get geo data from online source.
+geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson"
+load_geodata(geodata_url, save_flag = FALSE)
+
+
+#color-palette for polygons (leaflet map)
+pal <-colorNumeric(
+  palette = "YlGn",
+  domain = geodata$cases7_per_100k,
+  reverse = T
+)
+
+
+#labels for polygons (leaflet map)
+labs <- as.list(paste0("<b>Informations</b> <br>", 
+                       "<b>Name:</b> ", geodata$GEN, "<br>",
+                       "<b>Population:</b> ", geodata$EWZ, "<br>",
+                       "<b>State:</b> ", geodata$BL, "<br>",
+                       "<b>Cases per 100.000 (7 Days):</b> ", round(geodata$cases7_per_100k,2), "<br>",
+                       "<b>Cases (total):</b> ", geodata$cases, "<br>",
+                       "<b>Deaths (total):</b> ", geodata$deaths))
+
+
+#Bundeslaender for selectInput()
+bl <- sort(unique(geodata$BL))
+
+#subset geodata for easier use
+gdata <- geodata %>% as_tibble() %>% 
+  select(c(BL, EWZ_BL, BEZ, GEN, EWZ, cases, cases_per_100k, 
+           cases7_per_100k, deaths, death_rate))
+
+shinyApp(
+  
+  ui = navbarPage(theme = shinytheme("flatly"), 
+                 "Covid-19 in Germany",
+                 tabPanel("Map",
+                          fillPage(
+                            leafletOutput("c19map", height = 1000)
+                            )
+                          ),
+                 tabPanel("Table",
+                          fluidPage(
+                            DTOutput("tbl"),
+                            style = "height:1000px; overflow-y: scroll;overflow-x: scroll;"
+                            )
+                          ),
+                 tabPanel("Plots",
+                          fluidRow(
+                            column(6,
+                                   selectInput("region", 
+                                               label = "Choose a state of Germany", 
+                                               choices = c("Germany (total)", bl),
+                                               selected = "Germany (total)"))
+                            ),
+                          fluidRow(column(4,
+                                          plotOutput("piechart"),
+                                          plotOutput("c7_hi")),
+                                   column(4,
+                                          plotOutput("c_hi"),
+                                          plotOutput("c_lo")),
+                                   column(4,
+                                          plotOutput("d_hi"),
+                                          plotOutput("d_lo"))
+                            )
+                          )
+                        ),
+  
+  server <- function(input, output) {
+  
+  output$c19map <- renderLeaflet({
+    #leaflet map
+    leaflet(geodata) %>% 
+      addTiles() %>% 
+      addPolygons(stroke = F, smoothFactor = 0.2, fillOpacity = 0.3,
+                  color = ~pal(cases7_per_100k)
+      ) %>% 
+      addLegend(position = "topright", pal = pal, values = ~cases7_bl_per_100k,
+                title = "Cases per 100.000 (last 7 days) </br> '7-day-incidence'"
+      ) %>% 
+      addPolygons(stroke = T, weight = 0.5, color = "black", 
+                  label = lapply(labs, HTML),
+                  labelOptions = labelOptions(textsize = "12px"))
+  })
+  
+  output$tbl <- renderDT({
+    #interactive data table
+    datatable(gdata %>% select(c(-2,-3)) %>% mutate(across(c(5,6,8), round, 2)),
+              rownames = F,
+              colnames = c("State", "County", "Population", "Cases",
+                           "Cases per 100.000", "Cases per 100.000 (last 7 days)", 
+                           "Deaths", "Deathrate"))
+  })
+  
+  
+  output$piechart <- renderPlot({
+    #piechart
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        mutate(sumcases = sum(cases)) %>% 
+        mutate(BL = fct_lump_n(BL, n=5, w=sumcases)) %>% 
+        group_by(BL) %>%
+        summarise(cases_sum = sum(cases)) %>% 
+        mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>% 
+        ggplot(., aes(x="", y=percentage, fill=BL)) + 
+        geom_bar(stat = "identity") +
+        coord_polar("y", start = 0) +
+        theme_void() + 
+        theme(legend.position = "bottom", legend.direction = "horizontal") +
+        scale_fill_brewer(palette = "Pastel2") +
+        geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                  position = position_stack(vjust = 0.5), size=3) + 
+        labs(title = "Percentage of the states in total number of cases",
+             subtitle = "Top 5 and rest",
+             fill = "")
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% mutate(BL = as.factor(ifelse(BL==bundesland, bundesland, "other"))) %>% 
+          group_by(BL) %>%
+          summarise(cases_sum = sum(cases)) %>% 
+          mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>%
+          ggplot(., aes(x="", y=percentage, fill=reorder(BL, percentage))) + 
+          geom_bar(stat = "identity") +
+          coord_polar("y", start = 0) +
+          theme_void() + 
+          theme(legend.position = "bottom", legend.direction = "horizontal") +
+          scale_fill_brewer(palette = "Pastel2") +
+          geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                    position = position_stack(vjust = 0.5), size=3) + 
+          labs(title = paste("Percentage of", bundesland, "in total number of cases"),
+               subtitle = "compared to all other states",
+               fill = "")
+      }
+    }
+  })
+  
+  
+  output$c7_hi <- renderPlot({
+    #plot of LKs with highest c7/100k
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+        geom_col(aes(fill=cases7_per_100k)) + 
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=60,hjust=1)) +
+        labs(title = "Cases per 100.000 (last 7 days)",
+             subtitle = "Counties with the highest 7-day-incidence",  
+             x="County", 
+             y="", fill="Cases per 100.000") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+          geom_col(aes(fill=cases7_per_100k)) + 
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=60,hjust=1)) +
+          labs(title = "Cases per 100.000 (last 7 days)",
+               subtitle = "Counties with the highest 7-day-incidence", 
+               x="County", 
+               y="", fill="Cases per 100.000") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+      }
+    }
+  })
+  
+  output$c_hi <- renderPlot({
+    #plot of LKs with highest cases
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(desc(cases)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases), y=cases)) + 
+        geom_col(aes(fill=cases)) +
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=60,hjust=1)) +
+        labs(title = "Cases (total)",
+             subtitle = "Counties with the highest number of cases", 
+             x="County", 
+             y="", fill="Total cases") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases), y=cases)) + 
+          geom_col(aes(fill=cases)) +
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=60,hjust=1)) +
+          labs(title = "Cases (total)",
+               subtitle = "Counties with the highest number of cases", 
+               x="County", 
+               y="", fill="Total cases") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+      }
+    }
+  })
+  
+  output$c_lo <- renderPlot({
+    #plot of LKs with lowest cases
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(cases) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), cases), y=cases)) + 
+        geom_col(aes(fill=cases)) +
+        scale_fill_distiller(palette = "Greens", direction = -1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=60,hjust=1)) +
+        labs(title = "Cases (total)",
+             subtitle = "Counties with the lowest number of cases", 
+             x="County", 
+             y="", fill="Total cases") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(cases) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), cases), y=cases)) + 
+          geom_col(aes(fill=cases)) +
+          scale_fill_distiller(palette = "Greens", direction = -1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=60,hjust=1)) +
+          labs(title = "Cases (total)",
+               subtitle = "Counties with the lowest number of cases", 
+               x="County", 
+               y="", fill="Total cases") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+      }
+    }
+  })
+  
+  output$d_hi <- renderPlot({
+    #plot of LKs with highest deaths
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(desc(deaths)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -deaths), y=deaths)) + 
+        geom_col(aes(fill=deaths)) +
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=60,hjust=1)) +
+        labs(title = "Deaths (total)",
+             subtitle = "Counties with the highest number of deaths", 
+             x="County", 
+             y="", fill="Total deaths") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(deaths)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -deaths), y=deaths)) + 
+          geom_col(aes(fill=deaths)) +
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=60,hjust=1)) +
+          labs(title = "Deaths (total)",
+               subtitle = "Counties with the highest number of deaths", x="County", 
+               y="", fill="Total deaths") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+      }
+    }
+  })
+  
+  output$d_lo <- renderPlot({
+    #plot of LKs with lowest deaths
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        arrange(deaths) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), deaths), y=deaths)) + 
+        geom_col(aes(fill=deaths)) +
+        scale_fill_distiller(palette = "Greens", direction = -1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=60,hjust=1)) +
+        labs(title = "Deaths (total)",
+             subtitle = "Counties with the lowest number of deaths", 
+             x="County", 
+             y="", fill="Total deaths") +
+        scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+    } else {
+      bundesland <- input$region
+      if (input$region == bundesland){
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(deaths) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), deaths), y=deaths)) + 
+          geom_col(aes(fill=deaths)) +
+          scale_fill_distiller(palette = "Greens", direction = -1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=60,hjust=1)) +
+          labs(title = "Deaths (total)",
+               subtitle = "Counties with the lowest number of deaths", 
+               x="County", 
+               y="", fill="Total deaths") +
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+      }
+    }
+  })
+},
+  
+  options = list(width=1000, height=1000)  
+
+)
+
+```
+
 
 # 4. Conclusion
 
