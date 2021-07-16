@@ -85,7 +85,168 @@ After one has completed the work on an app, the question of how the software can
 
 # 3. Examples
 
-### code description will follow.
+In this section we will present some examples of shiny apps, which were written by us.
+
+## 3.1 Distribution plotter
+
+## 3.2 Interactive Regression
+
+## 3.3 Covid-19 Dashboard
+
+This application will be the most elaborate example. We wanted to create a dashboard that shows some relevant Covid-19 data,
+as it's still a relevant topic. We decided to include a map, which shows key data for each county, an interactive datatable for users to explore the data and some plots about some more key data.
+
+Firstly the required packages have to be installed and loaded.
+
+```{r, eval=FALSE}
+
+packages <- c("DT", "htmltools", "leaflet", "RColorBrewer", "sf", "shiny",
+              "shinythemes", "tidyverse")
+
+for (i in packages) { #Installs packages if not yet installed
+    if(! i %in% row.names(installed.packages())) install.packages(i)
+}
+
+library(DT)
+library(htmltools)
+library(leaflet)
+library(RColorBrewer)
+library(sf)
+library(shiny)
+library(shinythemes)
+library(tidyverse)
+
+```
+
+The <code>packages</code> vector contains all packages that are used in this app. [DT](https://rstudio.github.io/DT/){target="_blank"} is a package which provides an R interface to the DataTables library, which is written in Javascript. It allows R data objects to be displayed as HTML-Tables.
+[htmltools](https://rstudio.github.io/htmltools/){target="_blank"} is used to generate custom HTML using R code, which can be used to customize user interfaces. 
+[leaflet](https://rstudio.github.io/leaflet/){target="_blank"} integrates the equally named JavaScript library in R. It can be used to create interactive maps and customize them.
+RColorBrewer contains the color palettes which are used in various plots and outputs.
+The simple features or [sf](https://r-spatial.github.io/sf/articles/sf1.html){target="_blank"} is used to read spatial data like GIS or GeoJSON.
+Shiny and shinythemes create the graphical user interface and its design, while the [tidyverse](https://www.tidyverse.org/){target="_blank"} packages are used for data wrangling and plotting (ggplot2).
+
+After preparing the necessary packages we have to load our data into R. The "[RKI Corona Landkreise](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0/about){target="_blank"}" from the Robert-Koch-Institute was used, because it contains all the key data for each county in Germany. 
+
+```{r, eval=FALSE}
+load_geodata <- function(url, save_flag=FALSE) {
+  # Try to read geo data from the provided URL.
+  # If reading fails, an older local copy is used.
+  # Set save_flag = TRUE to replace the local copy
+  # with newer data.
+  tryCatch(
+    expr = {
+      geodata <<- read_sf(geodata_url)
+    }, 
+    error = function(e) {
+      print(paste0("Error: Failed to read data from online source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    },
+    warning = function(w) {
+      print(paste0("Warning: Failed to parse data from JSON source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    }
+  )
+  
+  if (save_flag) {
+    # Saving data object in RData format.
+    save(geodata, file = "geodata.RData")
+  }
+}
+
+
+# Get geo data from online source.
+geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson"
+load_geodata(geodata_url, save_flag = FALSE)
+```
+
+The data is provided as GeoJSON file and can be accessed by using an API link provided on the website. The <code>load_geodata</code> acts as an error handler. After running the code for the first time the data will be saved as RData object, which can be used as substitute data in case the API can't be reached. As the data is provided as GeoJSON file, the easiest way to read the data into R is by using the <code>read_sf</code> function from the sf package.
+
+Now that the data is ready to be used, some more things have to be prepared. 
+
+### provide overview of data.
+
+```{r, eval=FALSE}
+#color-palette for polygons (leaflet map)
+pal <-colorNumeric(
+  palette = "YlGn",
+  domain = geodata$cases7_per_100k,
+  reverse = T
+)
+
+
+#labels for polygons (leaflet map)
+labs <- as.list(paste0("<b>Informations</b> <br>", 
+                       "<b>Name:</b> ", geodata$GEN, "<br>",
+                       "<b>Population:</b> ", geodata$EWZ, "<br>",
+                       "<b>State:</b> ", geodata$BL, "<br>",
+                       "<b>Cases per 100.000 (7 Days):</b> ", round(geodata$cases7_per_100k,2), "<br>",
+                       "<b>Cases (total):</b> ", geodata$cases, "<br>",
+                       "<b>Deaths (total):</b> ", geodata$deaths))
+```
+
+A color palette and labels have to be created for the leaflet map. The <code>pal</code> vector contains a custom color palette with yellow and green tones that are scaled to the value of the cases per 100.000 in the last 7 days. The <code>labs</code> vector contains the information that is displayed on the tags. Labels of leaflet objects can contain HTML, which is why <code>b</code> is used for bold text and <code>br</code> is used for line breaks.
+
+```{r, eval=FALSE}
+#States for selectInput()
+bl <- sort(unique(geodata$BL))
+```
+
+Next, a vector <code>bl</code> was created, containing the names of all states in Germany. this vector is used in the dropdown menu to choose a state.
+
+```{r, eval=FALSE}
+#subset geodata for easier use
+gdata <- geodata %>% as_tibble() %>% 
+  select(c(BL, EWZ_BL, BEZ, GEN, EWZ, cases, cases_per_100k, 
+           cases7_per_100k, deaths, death_rate))
+```
+
+Our data <code>geodata</code> contains all the geometry that is used for the map and a lot of variables, which are not really important for this app, which is why the <code>gdata</code> subset was created. The <code>as_tibble</code> function removes the geometry information and turns our data into a tibble dataframe, while <code>select</code> selects the variables of interest.
+
+After preparing everything needed, the UI of the dashboard can be programmed.
+
+```{r, eval=FALSE}
+ui <-  navbarPage(theme = shinytheme("flatly"), 
+                 "Covid-19 in Germany",
+                 tabPanel("Map",
+                          fillPage(
+                            leafletOutput("c19map", height = 1000)
+                            )
+                          ),
+                 tabPanel("Table",
+                          fluidPage(
+                            DTOutput("tbl"),
+                            style = "height:1000px; overflow-y: scroll;overflow-x: scroll;"
+                            )
+                          ),
+                 tabPanel("Plots",
+                          fluidRow(
+                            column(6,
+                                   selectInput("region", 
+                                               label = "Choose a state of Germany", 
+                                               choices = c("Germany (total)", bl),
+                                               selected = "Germany (total)"))
+                            ),
+                          fluidRow(column(4,
+                                          plotOutput("piechart"),
+                                          plotOutput("c7_hi")),
+                                   column(4,
+                                          plotOutput("c_hi"),
+                                          plotOutput("c_lo")),
+                                   column(4,
+                                          plotOutput("d_hi"),
+                                          plotOutput("d_lo"))
+                            )
+                          )
+                        )
+```
+
+<code>navbarPage</code> creates a layout with a navigation bar on the top of the dashboard. The shinytheme "flatly" is used, which changes the visuals of the UI. The title is set by the string "Covid-19 in Germany". After creating the navbar layout, the function <code>tabPanel</code> is used to created tabs within the layout. This apps contains 3 tabs. The first tab is labeled "Map" and contains the interactive leaflet map. <code>fillPage</code> creates a window that will always fill the browser window. The map object is labeled "c19map" and a height of 1000 pixels is set. It is rendered by the <code>leafletOutput</code> function. The second tab contains the datatable. The window is created by <code>fluidPage</code> which is used to create fluid layouts consisting of rows and columns. The table object is labeled "tbl". It is labeled by the <code>DTOutput</code> function. Furthermore the height is set to 1000 pixels and the contents are made scrollable on the x- and y-axis if the content overflows the app. The last tab contains the plots. It consists of two fluid rows. The first row contains the dropdown menu which is created with <code>selectInput</code> and lets the user choose a state. The second row contains the different plots in three columns. The columns are 4 units wide each, which make them take up the whole horizontal space (12 units). The plots are rendered by the <code>plotOutput</code> function.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 packages <- c("DT", "htmltools", "leaflet", "RColorBrewer", "sf", "shiny",
@@ -159,7 +320,7 @@ labs <- as.list(paste0("<b>Informations</b> <br>",
                        "<b>Deaths (total):</b> ", geodata$deaths))
 
 
-#Bundeslaender for selectInput()
+#States for selectInput()
 bl <- sort(unique(geodata$BL))
 
 #subset geodata for easier use
