@@ -38,7 +38,7 @@ library(shiny)
 
 A Shiny app essentially consists of two components, each of which can be implemented as a function in R. The first one being the UI function containing everything in terms of app layout, themes and control elements. This part of the app will be covered in section 2.1. The second part of a Shiny app consists of yet another function, the so called server function. All server-side tasks are carried out here. This includes, for example, generating outputs and handling user inputs. Section 2.2 deals with this part of the app. The code of these two components can be placed inside a single file, <code>app.R</code>. This file must return an object created by the<code>shinyApp()</code> function. However, for larger applications an individual <code>ui.R</code> and <code>server.R</code> file can be used, to give the code base a cleaner structure. The following examples shows the code layout and function calls for a standalone Shiny app implemented in a single <code>app.R</code> file.
 
-```{r, results='hide', message=FALSE, warning=FALSE}
+```{r, eval = FALSE}
 # Define UI for application. 
 # Here, a fluid Page layout is used.
 ui <- fluidPage(
@@ -57,9 +57,9 @@ shinyApp(ui = ui, server = server)
 
 ## 2.1 Adding controls - UI
 
-There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI Layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
+There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
 
-The second group of functions are the UI Input functions. These functions are used to create user interface elements that prompt the user for input values or interaction, such as checkboxes, sliders or drop-down menus for example.
+The second group of functions are the UI input functions. These functions are used to create user interface elements that prompt the user for input values or interaction, such as checkboxes, sliders or drop-down menus for example.
 
 ```{r, echo=FALSE}
 checkboxInput("example1", "checkbox", FALSE)
@@ -69,11 +69,59 @@ sliderInput("example3", label = "slider",
               min = 0, max = 2, value = 1, step = 0.1)
 ```
 
-The last group of functions are the UI output functions. They create user interface elements that, in conjunction from server side rendering function display different kinds of output from the application, like plots or tables.
+This allows us to pass on values for variables directly from the user to the server logic. To fulfill this purpose, all input functions have the same first argument <code>inputId</code> which is an unique identifier string for the input value. If one creates an input function with <code>inputId = "my_control"</code>, this can be accessed in the server function with <code>input\$my_control</code>. Looking at the slider example form above, the code of choosing a value between $0$ and $2$, labeld with _"slider"_ is given below. 
+
+```{r, eval = FALSE}
+sliderInput(inputId = "my_slider", label = "slider",
+              min = 0, max = 2, value = 1, step = 0.1)
+```
+
+The last group of functions are the UI output functions. They create user interface elements that, in conjunction from server side rendering function display different kinds of output from the application, like text, plots or tables. They are used in a similar manner to the input functions. Each output function therefore has the same first argument <code>outputId</code>, again representing an unique identifier string. These identifier are then used in the server function like <code>output$my_output</code> paired with a <code>render()</code> function to process and display the output. The code below gives an example of how to integrate text, a plot and a table in the layout of the shiny app.
+
+```{r, eval = FALSE}
+textOutput(outputId = "my_text")
+plotOutput(outputId = "my_plot")
+tableOutput(outputId = "my_table")
+```
+
+The following section will give a brief overview of combining the UI elements from this section with more logic and interacting with the variable values.
 
 ## 2.2 Adding behavior - server
 
-The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}.
+The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}. We will use the <code>input</code> and <code>output</code> arguments of our <code>server()</code> function to pass the elements of our <code>ui</code> object to each other. First consider the slider example from the previous section. Let's say, one would like to display the chosen number as a simple text object in the app. We can achieve is by using the following code. In the server function we add the <code>output\$my_text</code> object, which is linked to the UI component via the unique identifier string <code>"my_text"</code> as a member of the <code>output</code> argument. Furthermore we use the <code>renderText()</code> function, since we want to display plain text. Here <code>input\$my_slider</code> is used to fetch the number on the slider from the user input.
+```{r, eval=FALSE}
+# Define UI for application. 
+ui <- fluidPage(
+  # Slider function.
+  sliderInput(inputId = "my_slider", label = "slider",
+              min = 0, max = 2, value = 1, step = 0.1),
+  
+  # Text output function.
+  textOutput(outputId = "my_text")
+)
+
+# Define server logic as function of inputs and outputs.
+server <- function(input, output) {
+  output$my_text <- renderText({ 
+    paste0("Your number is: ", input$my_slider)
+  })
+}
+
+# Run the shiny application.
+shinyApp(ui = ui, server = server)
+```
+
+```{r, echo=FALSE}
+# The above example is displayed using this code, because the output is smaller.
+sliderInput(inputId = "my_slider", label = "slider",
+              min = 0, max = 2, value = 1, step = 0.1)
+  
+textOutput(outputId = "my_text")
+
+output$my_text <- renderText({ 
+    paste0("Your number is: ", input$my_slider)
+  })
+```
 
 #### Extra: Using Shiny in documents - interactive documents
 
