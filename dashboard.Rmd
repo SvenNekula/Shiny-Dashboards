@@ -215,9 +215,53 @@ load_geodata(geodata_url, save_flag = FALSE)
 
 The data is provided as GeoJSON file and can be accessed by using an API link provided on the website. The <code>load_geodata</code> acts as an error handler. After running the code for the first time the data will be saved as RData object, which can be used as substitute data in case the API can't be reached. As the data is provided as GeoJSON file, the easiest way to read the data into R is by using the <code>read_sf</code> function from the sf package.
 
-Now that the data is ready to be used, some more things have to be prepared. 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#installing / loading sf to load the data
+if (!require("sf")) install.packages("sf")
+library(sf)
 
-### provide overview of data.
+load_geodata <- function(url, save_flag=FALSE) {
+  # Try to read geo data from the provided URL.
+  # If reading fails, an older local copy is used.
+  # Set save_flag = TRUE to replace the local copy
+  # with newer data.
+  tryCatch(
+    expr = {
+      geodata <<- read_sf(geodata_url)
+    }, 
+    error = function(e) {
+      print(paste0("Error: Failed to read data from online source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    },
+    warning = function(w) {
+      print(paste0("Warning: Failed to parse data from JSON source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    }
+  )
+  
+  if (save_flag) {
+    # Saving data object in RData format.
+    save(geodata, file = "geodata.RData")
+  }
+}
+
+
+# Get geo data from online source.
+geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson"
+load_geodata(geodata_url, save_flag = FALSE)
+
+str(geodata)
+```
+
+As can be seen by the output of the <code>str</code> command, our data has 48 variables and 412 observations. A lot of the variables are not of interest for this project and contain different IDs for example. The shape and geometry data can also be seen, the latter being contained in another list inside of the dataframe.
+
+Now that the data is ready to be used, some more things have to be prepared. 
 
 ```{r, eval=FALSE}
 #color-palette for polygons (leaflet map)
@@ -254,7 +298,7 @@ gdata <- geodata %>% as_tibble() %>%
            cases7_per_100k, deaths, death_rate))
 ```
 
-Our data <code>geodata</code> contains all the geometry that is used for the map and a lot of variables, which are not really important for this app, which is why the <code>gdata</code> subset was created. The <code>as_tibble</code> function removes the geometry information and turns our data into a tibble dataframe, while <code>select</code> selects the variables of interest.
+As seen above, our data <code>geodata</code> contains all the geometry that is used for the map and a lot of variables, which are not really important for this app, which is why the <code>gdata</code> subset was created. The <code>as_tibble</code> function removes the geometry information and turns our data into a tibble dataframe, while <code>select</code> selects the variables of interest.
 
 After preparing everything needed, the UI of the dashboard can be programmed.
 
@@ -294,7 +338,154 @@ ui <-  navbarPage(theme = shinytheme("flatly"),
                         )
 ```
 
-<code>navbarPage</code> creates a layout with a navigation bar on the top of the dashboard. The shinytheme "flatly" is used, which changes the visuals of the UI. The title is set by the string "Covid-19 in Germany". After creating the navbar layout, the function <code>tabPanel</code> is used to created tabs within the layout. This apps contains 3 tabs. The first tab is labeled "Map" and contains the interactive leaflet map. <code>fillPage</code> creates a window that will always fill the browser window. The map object is labeled "c19map" and a height of 1000 pixels is set. It is rendered by the <code>leafletOutput</code> function. The second tab contains the datatable. The window is created by <code>fluidPage</code> which is used to create fluid layouts consisting of rows and columns. The table object is labeled "tbl". It is labeled by the <code>DTOutput</code> function. Furthermore the height is set to 1000 pixels and the contents are made scrollable on the x- and y-axis if the content overflows the app. The last tab contains the plots. It consists of two fluid rows. The first row contains the dropdown menu which is created with <code>selectInput</code> and lets the user choose a state. The second row contains the different plots in three columns. The columns are 4 units wide each, which make them take up the whole horizontal space (12 units). The plots are rendered by the <code>plotOutput</code> function.
+<code>navbarPage</code> creates a layout with a navigation bar on the top of the dashboard. The shinytheme "flatly" is used, which changes the visuals of the UI. The title is set by the string "Covid-19 in Germany". After creating the navbar layout, the function <code>tabPanel</code> is used to created tabs within the layout. This apps contains 3 tabs. The first tab is labeled "Map" and contains the interactive leaflet map. <code>fillPage</code> creates a window that will always fill the browser window. The map object is labeled "c19map" and a height of 1000 pixels is set. It is rendered by the <code>leafletOutput</code> function. The second tab contains the datatable. The window is created by <code>fluidPage</code> which is used to create fluid layouts consisting of rows and columns. A fluid layout is chosen to enable scrolling. The table object is labeled "tbl". It is labeled by the <code>DTOutput</code> function. Furthermore the height is set to 1000 pixels and the contents are made scrollable on the x- and y-axis if the content overflows the app. The last tab contains the plots. It consists of two fluid rows. The first row contains the dropdown menu which is created with <code>selectInput</code> and lets the user choose a state. The second row contains the different plots in three columns. The columns are 4 units wide each, which make them take up the whole horizontal space (12 units). The plots are rendered by the <code>plotOutput</code> function.
+This is all the code that is needed for the UI. Next the server functions have to be defined.
+
+```{r, eval=FALSE}
+output$c19map <- renderLeaflet({
+    leaflet(geodata) %>% 
+      addTiles() %>% 
+      addPolygons(stroke = F, smoothFactor = 0.2, fillOpacity = 0.3,
+                  color = ~pal(cases7_per_100k)
+      ) %>% 
+      addLegend(position = "topright", pal = pal, values = ~cases7_bl_per_100k,
+                title = "Cases per 100.000 (last 7 days) </br> '7-day-incidence'"
+      ) %>% 
+      addPolygons(stroke = T, weight = 0.5, color = "black", 
+                  label = lapply(labs, HTML),
+                  labelOptions = labelOptions(textsize = "12px"))
+  })
+```
+
+The first element of the app that will be defined is also on the mainpage of the shiny app. The output for the "c19map" leaflet map element is created by the <code>renderLeaflet</code> function. In this function a leaflet map is created by <code>leaflet(geodata)</code>. <code>addTiles</code> adds OpenStreetMap tiles to the object. The first <code>addPolygons</code> adds the color to the counties, using the palette that was specified above and is scaled by the amount of cases each country had per 100.000 inhabitants in the last 7 days. <code>addLegend</code> adds a legend in the top-right corner of the map. HTML can be used for strings as leaflet is based on HTML. The second <code>addPolygons</code>
+adds labels and black borders to the counties. The labeltext specified above was used.
+
+```{r, eval=FALSE}
+output$tbl <- renderDT({
+    datatable(gdata %>% select(c(-2,-3)) %>% mutate(across(c(5,6,8), round, 2)),
+              rownames = F,
+              colnames = c("State", "County", "Population", "Cases",
+                           "Cases per 100.000", "Cases per 100.000 (last 7 days)", 
+                           "Deaths", "Deathrate"))
+  })
+```
+
+The second element of the navbar is the datatable. It was created by the <code>rendetDT</code> function.
+Fitting variables were chosen via the <code>select</code> command and numeric variables were rounded to two decimals using the <code>round</code> command inside <code>mutate</code>. Furthermore the names of the columns were changed to a more user-friendly description using the <code>colnames</code> command inside <code>mutate</code>.
+
+Lastly the plots were created for the last tab within our navbar.
+
+```{r, eval=FALSE}
+output$piechart <- renderPlot({
+    #piechart
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        mutate(sumcases = sum(cases)) %>% 
+        mutate(BL = fct_lump_n(BL, n=5, w=sumcases)) %>% 
+        group_by(BL) %>%
+        summarise(cases_sum = sum(cases)) %>% 
+        mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>% 
+        ggplot(., aes(x="", y=percentage, fill=BL)) + 
+        geom_bar(stat = "identity") +
+        coord_polar("y", start = 0) +
+        theme_void() + 
+        theme(legend.position = "bottom", legend.direction = "horizontal") +
+        scale_fill_brewer(palette = "Pastel2") +
+        geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                  position = position_stack(vjust = 0.5), size=3) + 
+        labs(title = "Percentage of the states in total number of cases",
+             subtitle = "Top 5 and rest",
+             fill = "")
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        gdata %>% mutate(BL = as.factor(ifelse(BL==bundesland, bundesland, "other"))) %>% 
+          group_by(BL) %>%
+          summarise(cases_sum = sum(cases)) %>% 
+          mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>%
+          ggplot(., aes(x="", y=percentage, fill=reorder(BL, percentage))) + 
+          geom_bar(stat = "identity") +
+          coord_polar("y", start = 0) +
+          theme_void() + 
+          theme(legend.position = "bottom", legend.direction = "horizontal") +
+          scale_fill_brewer(palette = "Pastel2") +
+          geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                    position = position_stack(vjust = 0.5), size=3) + 
+          labs(title = paste("Percentage of", bundesland, "in total number of cases"),
+               subtitle = "compared to all other states",
+               fill = "")
+      }
+    }
+  })
+```
+
+The first plot on the page is a piechart, showing either the percentages of the top 5 states in total number of cases in Germany or the percentage of a state in total number of cases compared to Germany as a whole. What is shown is decided by the dropdown menu input on the page. If "Germany (total)" is chosen, the top 5 states will be displayed. It is created by the <code>renderPlot</code> function. For that, the data of the states outside the top 5 had to be grouped. This is done by the <code>fct_lump_n</code> command. Next the data was grouped, summarised and a percentage variable was created. A piechart can't be created directly using <code>ggplot2</code>. It can however be created by defining a barplot using <code>geom_bar</code> and making the barplot object circular using <code>coord_polar</code>. The theme was set to "void" using <code>theme_void</code> because it keeps the background of the plot white and removes the axis. The palette was set in <code>scale_fill_brewer</code>, while the percentage numbers and labels were created by <code>geom_text</code> and <code>labs</code> respectively. If a specific state is chosen in the dropdown menu, the data manipulation varies a bit compared to the manipulation of the data for Germany as a whole. The manipulation is specific to each state and is changed with an <code>if</code> statement. After that the variable "BL" containing all the states is changed to a factor variable, were the chosen state is the first and "other" is the second factor. The rest of the code (i.e. the ggplot2 code for the piechart) is equal to the one explained above.
+
+The remaining plots were all created equally with just the data manipulation and some text differing between them. Because of that only one of the remaining plots will be explained in full length.
+
+```{r, eval=FALSE}
+output$c7_hi <- renderPlot({
+    #plot of LKs with highest c7/100k
+    if (input$region == "Germany (total)"){
+      
+      xLabs <- gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        select(4) %>% pull()
+      
+      gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+        geom_col(aes(fill=cases7_per_100k)) + 
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=90,hjust=1)) +
+        labs(title = "Cases per 100.000 (last 7 days)",
+             subtitle = "Counties with the highest 7-day-incidence",  
+             x="County", 
+             y="", fill="Cases per 100.000") +
+        scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        
+        xLabs <- gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>%
+          select(4) %>% pull()
+        
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+          geom_col(aes(fill=cases7_per_100k)) + 
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=90,hjust=1)) +
+          labs(title = "Cases per 100.000 (last 7 days)",
+               subtitle = "Counties with the highest 7-day-incidence", 
+               x="County", 
+               y="", fill="Cases per 100.000") +
+          scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      }
+    }
+  })
+```
+
+The plot explained can be seen in the middle of the upper row in the "Plots"-tab. It shows the counties with the highest amount of cases per 100.000 inhabitants in the last 7 days. If the dropdown menu item "Germany (total)" is selected the counties with the top 5 highest values of entire Germany will be displayed, if a state is chosen the counties with the top 5 values within the state are displayed. The plot is again created by the <code>renderPlot</code> function. Firstly a character vector <code>xLabs</code> is created for the labels. Why this is needed will be explained a little later. Then the data is arranged in descending order of cases per 100.000 in the last 7 days and the top 5 counties are chosen. Then a barplot is created using <code>geom_col</code>. Because some cities are counties and have the same name as the county surrounding them (i.e. Bamberg city and Bamberg county) the type of county (city/not city/etc.) and the name of the county were pasted together to prevent inconsistent plotting and stacking of the data. This is why the <code>xLabs</code> object had to be created. It is used for the x-axis text and makes it easier to read by "reversing" the combination of both strings. The data was also ordered from highest to lowest inside of the plot using <code>reorder</code>. The <code>scale_fill_distiller</code> function was used to color the plot and scale the color with the value. The theme "classic" was set using <code>theme_classic</code> and was choosen for aesthetic reasons. The x-axis text was rotated 90 degrees and a linebreak function for better readability using <code>angle</code> inside the <code>theme</code> function and <code>str_wrap</code> inside the <code>scale_x_discrete</code> function. The legend and title were added in the <code>labs</code> function. If a state is selected the creation of the plot is done equally except the data manipulation. Here the data is first filtered by the selected state using an <code>if</code> statement and <code>filter</code>. The rest of the code remains the same except some strings for the legend.
+
+As stated above, the other plots were all created in the same way except using other <code>arrange</code> or <code>filter</code> functions and different labels. The code for the other plots can be found in the source code of our [GitHub](https://github.com/SvenNekula/Shiny-Dashboards){target="_blank"}-repository.
+
+After explaining all the elements of the app in detail, the entire app can be seen below.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 packages <- c("DT", "htmltools", "leaflet", "RColorBrewer", "sf", "shiny",
