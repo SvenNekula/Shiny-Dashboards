@@ -64,31 +64,31 @@ fitLinearModel <- function(target, variables, dataset, splitRate){
 ### ---------- ###
 
 # Model 1
-target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
-variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
-fit <- fitLinearModel(target, variables, BostonHousing, 0.85)
-summary(fit[[1]])
-fit[[2]]
-fit[[3]]
-fit[[4]]
-fit[[5]]
+#target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+#variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
+#fit <- fitLinearModel(target, variables, BostonHousing, 0.85)
+#summary(fit[[1]])
+#fit[[2]]
+#fit[[3]]
+#fit[[4]]
+#fit[[5]]
 
 # Model 2
-variables2 <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 5)]
-fit2 <- fitLinearModel(target, variables2, BostonHousing, 0.85)
+#variables2 <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 5)]
+#fit2 <- fitLinearModel(target, variables2, BostonHousing, 0.85)
 
 # Plot results.
 #quartz()
 #plot(c(1:length(fit[[5]][, 1])), fit[[5]][, 1], col = c(1:length(fit[[5]][, 1])), pch = 1, xlab = "Index", ylab = "Target")
 #points(c(1:length(fit[[3]])), fit[[3]], col = c(1:length(fit[[3]])), pch = 3)
-plot(c(1:length(fit[[5]][, 1])), fit[[5]][, 1], col = "blue", pch = 1, xlab = "Index", ylab = "Target")
-lines(spline(c(1:length(fit[[5]][, 1])), fit[[5]][, 1]), col = "blue")
-points(c(1:length(fit[[3]])), fit[[3]], col = "red", pch = 2)
-lines(spline(c(1:length(fit[[3]])), fit[[3]]), col = "red")
-points(c(1:length(fit2[[3]])), fit2[[3]], col = "green", pch = 3)
-lines(spline(c(1:length(fit2[[3]])), fit2[[3]]), col = "green")
+#plot(c(1:length(fit[[5]][, 1])), fit[[5]][, 1], col = "blue", pch = 1, xlab = "Index", ylab = "Target")
+#lines(spline(c(1:length(fit[[5]][, 1])), fit[[5]][, 1]), col = "blue")
+#points(c(1:length(fit[[3]])), fit[[3]], col = "red", pch = 2)
+#lines(spline(c(1:length(fit[[3]])), fit[[3]]), col = "red")
+#points(c(1:length(fit2[[3]])), fit2[[3]], col = "green", pch = 3)
+#lines(spline(c(1:length(fit2[[3]])), fit2[[3]]), col = "green")
 
-layout()
+#layout()
 
 
 ### Shiny app ###
