@@ -8,7 +8,7 @@ library(shinythemes)
 library(tidyverse)
 
 
-load_geodata <- function(url, save_flag=FALSE) {
+load_geodata <- function(geodata_url, save_flag=FALSE) {
   # Try to read geo data from the provided URL.
   # If reading fails, an older local copy is used.
   # Set save_flag = TRUE to replace the local copy
