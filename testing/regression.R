@@ -99,7 +99,6 @@ target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
 variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
 
 # To Do: 
-# - Set starting values in checkboxes
 # - Maybe reduce calculations by isolating code
 # - clean up app appearance
 
@@ -108,6 +107,7 @@ ui <- fluidPage(
   fluidRow(
     column(6,
       checkboxGroupInput("variablesModel1", "Choose variables for model 1:",
+                         selected = variables[1],
                          choiceNames =
                            variables,
                          choiceValues =
@@ -119,6 +119,7 @@ ui <- fluidPage(
     
     column(6,
       checkboxGroupInput("variablesModel2", "Choose variables for model 2:",
+                         selected = variables[2],
                          choiceNames =
                            variables,
                          choiceValues =
@@ -174,7 +175,7 @@ server <- function(input, output, session) {
            col = "green", pch = 3)
     lines(spline(c(1:length(fit2[[3]])), fit2[[3]]), 
           col = "green")
-    legend(1, 95, legend = c("True values", "model 1", "model 2"), col = c("blue", "red", "green"))
+    legend(0, 50, legend = c("True values", "model 1", "model 2"), col = c("blue", "red", "green"), lty = 1)
   })
 }
 
