@@ -139,6 +139,343 @@ In this section we will present some examples of shiny apps, which were written 
 
 ## 3.2 Interactive Regression
 
+The application presented in this section is intended to clarify the interactive components in relation to statistical data analysis. The following app can calculate two linear models of the form 
+
+\begin{align*}
+y = \textbf{X}\beta + \epsilon
+\end{align*}
+
+for one data set simultaneously. The results can be compared directly. Therefore the _Akaike information criterion (AIC)_ is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a "better" model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions of each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.
+
+First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostenHousing</code> data set from the <code>mlbench</code> package.
+
+```{r, echo=TRUE}
+# Include shiny.
+if (!require("shiny")) install.packages("shiny")
+library(shiny)
+
+# Install the package containing the data.
+if (!require("mlbench")) install.packages("mlbench")
+library(mlbench)
+```
+
+The <code>BostenHousing</code> data set contains 506 census tracts of Boston from the 1970 census on 14 variables. The target being <code>medv</code> which represents the median value of owner-occupied homes in USD 1000's. 
+
+```{r, echo=TRUE}
+# Take a look at the data.
+data(BostonHousing)
+head(BostonHousing)
+```
+
+The rest of these variables should be interactively used to change our model specifications. Therefore we save the names of these variables in a vector. Also the target is saved in an R variable. We are using <code>length(colnames(BostonHousing))</code> for implicit indexing.
+
+```{r, eval=FALSE}
+target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
+```
+
+In the next step we implement a wrapper function <code>fitLinearModel</code> for the <code>lm()</code> function of R. The latter function is part of the R <code>stats</code> package and is used to fit linear models of the above form. The wrapper takes a <code>target</code> input argument, which represents the target variable of the linear model. The <code>variables</code> argument is used to pass the variables for the fit of the linear model. Furthermore, the full data set <code>dataset</code> and the percentage value <code>splitRate</code> of training data, split from the full set, is passed to the wrapper function. With the first two arguments we can dynamically build the <code>formula</code> object for the <code>lm()</code> function. Here, a <code>for</code> loop is used to put together the object. In the next block, the train/test split is performed. A seed is used to ensure reproducible results. With that together, we can now fit the model using the training data. After that we use <code>AIC()</code> to calculate the value of the Akaike information criterion. Predictions are then calculated via <code>predict()</code>, now using the test data. Lastly, the absolute error is calculated as the difference between the true values and the predicted values. All of the results are merged into a single <code>list()</code> return object for further use.
+
+```{r, eval=FALSE}
+fitLinearModel <- function(target, variables, dataset, splitRate){
+  # Fits a linear model for the provided target and
+  # variables of the passed data set. 
+  modelFormula <- paste0(target, " ~")
+  counter <- 0
+  
+  # Set up formula object for the linear model.
+  for (variable in variables){
+    if (counter == 0){
+      modelFormula <- paste0(modelFormula, " ", variable)
+    } else {
+      modelFormula <- paste0(modelFormula, " + ", variable)
+    }
+    counter <- counter + 1
+  }
+  
+  # Perform train/test split of the provided data set.
+  set.seed(420)
+  sampleSize <- floor(splitRate * nrow(dataset))
+  trainIdx <- sample(seq_len(nrow(dataset)), size = sampleSize)
+  trainData <- dataset[trainIdx, ]
+  testData <- dataset[-trainIdx, ]
+  
+  # Fit the linear model and calculate predictions.
+  modelFit <- lm(formula = modelFormula, data = trainData)
+  modelAIC <- AIC(modelFit)
+  modelPredictions <- predict(modelFit, newdata = testData)
+  modelPredictionError <- abs(modelPredictions - testData[target])
+  
+  result <- list(model = modelFit, 
+                 AIC = modelAIC, 
+                 predictions = modelPredictions, 
+                 predictionErrors = modelPredictionError,
+                 trueValues = testData[target])
+  
+  return(result)
+}
+```
+
+This is all of the pre processing needed for the app. We can now start to write the code for the shiny app. As always, we begin with the UI component of the app. For this app, we use the <code>fluidPage</code> layout. Some standard HTML <code>h1()</code>, <code>p()</code> tags are used to provied some info for the user as simple text on the page. After that, we add a slider to control the train/test split rate by using <code>sliderInput()</code>. Since we want to control two models and there variables simultaneously, we split the <code>fluidPage()</code> into two equally sized columns using <code>column()</code>. Each of the two columns contains a <code>checkboxGroupInput</code> and a <code>textOutput</code>. The first one being a list of selectable items representing our model variables. The latter is an interface for the text output, which will display the AIC value of the model. Finally a plot output placeholder is added by <code>plotOutput</code>.
+
+```{r, eval=FALSE}
+ui <- fluidPage(
+  
+  h1("Interactive Linear Regression Models"),
+  
+  p("Use the checkboxes below to specifiy the variables for each of the two 
+    linear models. At least one variable must be selected for each model.
+    The train/test split rate can be controlled by the silder."),
+  
+  sliderInput("splitRate", "Select the percentage of training data (both models)", 
+              min = 0.1, max = 0.95, step = 0.05, value = 0.85),
+  
+  fluidRow(
+    column(6,
+           checkboxGroupInput("variablesModel1", "Choose variables for model 1:",
+                              selected = variables[1],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_1")
+    ),
+    
+    column(6,
+           checkboxGroupInput("variablesModel2", "Choose variables for model 2:",
+                              selected = variables[2],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_2")
+    )
+  ),
+  
+  plotOutput("plotPredictions")
+)
+```
+
+Again, the final component is the server function to define the logic of the app. We start by rendering the text output for the AIC values. We use <code>output\$modelAIC_1 <- renderText()</code> to wrap the calculation of the linear model. Inside this function the AIC result of the <code>fit</code> object is fetched for the text output. The same procedure can be applied for model two, but now using the input objects for the selection of model two. Finally, the plot is rendered using <code>output\$plotPredictions <- renderPlot()</code>. Here, both modeles are fitted and the return objects for setting up the plots are fetched. The data is plotted as points. To give some more context, spline interpolation is used to fit smooth curves through these points. Therefore the <code>spline()</code> function is used. 
+
+```{r, eval=FALSE}
+server <- function(input, output, session) {
+  # AIC output for model 1.
+  output$modelAIC_1 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 1: ", fit1[[2]]))
+  })
+  
+  # AIC output for model 2.
+  output$modelAIC_2 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 2: ", fit2[[2]]))
+  })
+  
+  # Plot output for both models.
+  output$plotPredictions <- renderPlot({
+    # Fit models
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    # Set up plot.
+    plot(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1], 
+         col = "blue", pch = 1, xlab = "Index", ylab = "Target", 
+         main = "Comparison of predicted test values and true values")
+    lines(spline(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1]), 
+          col = "blue")
+    points(c(1:length(fit1[[3]])), fit1[[3]], 
+           col = "red", pch = 2)
+    lines(spline(c(1:length(fit1[[3]])), fit1[[3]]), 
+          col = "red")
+    points(c(1:length(fit2[[3]])), fit2[[3]], 
+           col = "green", pch = 3)
+    lines(spline(c(1:length(fit2[[3]])), fit2[[3]]), 
+          col = "green")
+    legend(0, 50, legend = c("True values", "model 1", "model 2"), col = c("blue", "red", "green"), lty = 1)
+  })
+}
+```
+
+The complete app than has the following form.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# regression_app.R
+# In this script the Bosten housing data set is used
+# to predict the house price in bosten from house
+# details. This is the foundation of an interactive
+# shiny dashboard where you can compare two types 
+# of linear models. A discription of the data can be
+# found here:
+# https://www.rdocumentation.org/packages/mlbench/versions/2.1-3/topics/BostonHousing
+
+
+# Include shiny.
+if (!require("shiny")) install.packages("shiny")
+library(shiny)
+
+# Install the package containing the data.
+if (!require("mlbench")) install.packages("mlbench")
+
+
+fitLinearModel <- function(target, variables, dataset, splitRate){
+  # Fits a linear model for the provided target and
+  # variables of the passed data set. 
+  modelFormula <- paste0(target, " ~")
+  counter <- 0
+  
+  # Set up formula object for the linear model.
+  for (variable in variables){
+    if (counter == 0){
+      modelFormula <- paste0(modelFormula, " ", variable)
+    } else {
+      modelFormula <- paste0(modelFormula, " + ", variable)
+    }
+    counter <- counter + 1
+  }
+  
+  # Perform train/test split of the provided data set.
+  set.seed(420)
+  sampleSize <- floor(splitRate * nrow(dataset))
+  trainIdx <- sample(seq_len(nrow(dataset)), size = sampleSize)
+  trainData <- dataset[trainIdx, ]
+  testData <- dataset[-trainIdx, ]
+  
+  # Fit the linear model and calculate predictions.
+  modelFit <- lm(formula = modelFormula, data = trainData)
+  modelAIC <- AIC(modelFit)
+  modelPredictions <- predict(modelFit, newdata = testData)
+  modelPredictionError <- abs(modelPredictions - testData[target])
+  
+  result <- list(model = modelFit, 
+                 AIC = modelAIC, 
+                 predictions = modelPredictions, 
+                 predictionErrors = modelPredictionError,
+                 trueValues = testData[target])
+  
+  return(result)
+}
+
+
+### Shiny app ###
+### --------- ###
+
+# Load the data set.
+library(mlbench)
+data(BostonHousing)
+
+# Global scope
+target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
+
+
+ui <- fluidPage(
+  
+  h1("Interactive Linear Regression Models"),
+  
+  p("Use the checkboxes below to specifiy the variables for each of the two 
+    linear models. At least one variable must be selected for each model.
+    The train/test split rate can be controlled by the silder."),
+  
+  sliderInput("splitRate", "Select the percentage of training data (both models)", 
+              min = 0.1, max = 0.95, step = 0.05, value = 0.85),
+  
+  fluidRow(
+    column(6,
+           checkboxGroupInput("variablesModel1", "Choose variables for model 1:",
+                              selected = variables[1],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_1")
+    ),
+    
+    column(6,
+           checkboxGroupInput("variablesModel2", "Choose variables for model 2:",
+                              selected = variables[2],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_2")
+    )
+  ),
+  
+  plotOutput("plotPredictions")
+)
+
+server <- function(input, output, session) {
+  output$modelAIC_1 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 1: ", fit1[[2]]))
+  })
+  
+  output$modelAIC_2 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 2: ", fit2[[2]]))
+  })
+  
+  output$plotPredictions <- renderPlot({
+    # Fit models
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    # Set up plot.
+    plot(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1], 
+         col = "blue", pch = 1, xlab = "Index", ylab = "Target", 
+         main = "Comparison of predicted test values and true values")
+    lines(spline(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1]), 
+          col = "blue")
+    points(c(1:length(fit1[[3]])), fit1[[3]], 
+           col = "red", pch = 2)
+    lines(spline(c(1:length(fit1[[3]])), fit1[[3]]), 
+          col = "red")
+    points(c(1:length(fit2[[3]])), fit2[[3]], 
+           col = "green", pch = 3)
+    lines(spline(c(1:length(fit2[[3]])), fit2[[3]]), 
+          col = "green")
+    legend(0, 50, legend = c("True values", "model 1", "model 2"), col = c("blue", "red", "green"), lty = 1)
+  })
+}
+
+shinyApp(ui, server, options = list(width="110%", height=1000)  )
+```
+
+
+
 ## 3.3 Covid-19 Dashboard
 
 This application will be the most elaborate example. We wanted to create a dashboard that shows some relevant Covid-19 data,
