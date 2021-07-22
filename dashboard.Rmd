@@ -161,7 +161,7 @@ library(mlbench)
 
 The <code>BostenHousing</code> data set contains 506 census tracts of Boston from the 1970 census on 14 variables. The target being <code>medv</code> which represents the median value of owner-occupied homes in USD 1000's. 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, R.options=list(width = 400)}
 # Take a look at the data.
 data(BostonHousing)
 head(BostonHousing)
