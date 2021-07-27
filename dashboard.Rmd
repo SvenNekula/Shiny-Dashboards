@@ -21,7 +21,7 @@ Shiny is an R package that allows the user to create interactive web apps. Just 
 
 Before the package was released, it was more difficult for R users to create web apps. Either there was the possibility to work with the tcltk package, which was announced in 2001 and is also a graphic user interface (GUI) but with [different shortcomings](https://www.r-project.org/conferences/DSC-2001/Proceedings/Dalgaard.pdf){target=”_blank”}, or it required knowledge of HTML, CSS and JavaScript. Furthermore, this required the user to carefully analyze the interaction flows and dependencies of their code to prevent unrelated outputs to change, when some input changes.
 Shiny solves those problems by providing user interface (UI) functions that generate the needed HTML, CSS and JavaScript, which means that the user doesn't have to have any knowledge on these, if they don't want to go beyond the provided basics.
-It also introduced a new style of programming. **_Reactive programming_** keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes [@WICKHAM.2021].
+It also introduced a new style of programming. _Reactive programming_ keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes [@WICKHAM.2021].
 
 Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
 
@@ -93,6 +93,7 @@ The following section will give a brief overview of combining the UI elements fr
 ## Adding behavior - server
 
 The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}. We will use the <code>input</code> and <code>output</code> arguments of our <code>server()</code> function to pass the elements of our <code>ui</code> object to each other. First consider the slider example from the previous section. Let's say, one would like to display the chosen number as a simple text object in the app. We can achieve it by using the following code. In the server function we add the <code>output\$my_text</code> object, which is linked to the UI component via the unique identifier string <code>"my_text"</code> as a member of the <code>output</code> argument. Furthermore we use the <code>renderText()</code> function, since we want to display plain text. Here <code>input\$my_slider</code> is used to fetch the number on the slider from the user input.
+
 ```{r, eval=FALSE}
 # Define UI for application. 
 ui <- fluidPage(
@@ -238,7 +239,7 @@ For the beta-distribution which is defined as follows:
 
 the parameters are alpha and beta. For the sliders we chose a value range between 1 and 10 for each.
 
-For the normaldistribution
+For the normal distribution
 
 \begin{align*}
 &X \sim {\sf N}(\mu, \sigma^2) \\
