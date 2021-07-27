@@ -2,7 +2,10 @@
 title: "Advanced Data Analysis with R: Shiny dashboards."
 author: "Sven Nekula, Minke Preckel, Joshua Simon"
 date: "`r format(Sys.time(), '%d.%m.%Y')`"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    number_sections: true
 bibliography: literature.bib
 link-citations: yes
 ---
@@ -11,23 +14,24 @@ link-citations: yes
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# 1. Introduction - What is Shiny?
+# Introduction - What is Shiny?
 
 Shiny is an R package that allows the user to create interactive web apps. Just like other [popular R packages](https://www.rstudio.com/products/rpackages/){target="_blank"}, including the tidyverse packages, it was created by members of the RStudio team and was first released as version 0.2.3 on December 1st 2012. The most current version is 1.6.0 and was released on January 25th 2021. Further information on the current and past versions can be found [here](https://www.rdocumentation.org/packages/shiny/versions/1.6.0){target="_blank"}.
 
-Before the package was released, it was more difficult for R users to create web apps. Either there was the possibility to work with the tcltk package which was announced in 2001 and is also a graphic user interface (GUI) but with [different shortcomings](https://www.r-project.org/conferences/DSC-2001/Proceedings/Dalgaard.pdf){target=”_blank”} or it required knowledge of HTML, CSS and JavaScript. Furthermore, this required the user to carefully analyze the interaction flows and dependencies of their code to prevent unrelated outputs to change, when some input changes.
+Before the package was released, it was more difficult for R users to create web apps. Either there was the possibility to work with the tcltk package, which was announced in 2001 and is also a graphic user interface (GUI) but with [different shortcomings](https://www.r-project.org/conferences/DSC-2001/Proceedings/Dalgaard.pdf){target=”_blank”}, or it required knowledge of HTML, CSS and JavaScript. Furthermore, this required the user to carefully analyze the interaction flows and dependencies of their code to prevent unrelated outputs to change, when some input changes.
 Shiny solves those problems by providing user interface (UI) functions that generate the needed HTML, CSS and JavaScript, which means that the user doesn't have to have any knowledge on these, if they don't want to go beyond the provided basics.
 It also introduced a new style of programming. **_Reactive programming_** keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes [@WICKHAM.2021].
 
 Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
 
-## Motivation etc - PLACEHOLDER
+In the first section the structure and functions of shiny apps will be explained. 
+After that, some examples of shiny apps and their respective codes will be presented.
 
-# 2. Structure of a Shiny app
+# Structure of a Shiny app
 
 In this section we will show the structure behind apps that are created with Shiny. Before users can start to work with Shiny, they have to install and load the package.
 
-```{r, eval = FALSE}
+```{r, message=FALSE, warning=FALSE}
 # Installing Shiny
 if (!require("shiny")) install.packages("shiny")
 
@@ -35,7 +39,7 @@ if (!require("shiny")) install.packages("shiny")
 library(shiny)
 ```
 
-A Shiny app essentially consists of two components, each of which can be implemented as a function in R. The first one being the UI function containing everything in terms of app layout, themes and control elements. This part of the app will be covered in section 2.1. The second part of a Shiny app consists of yet another function, the so called server function. All server-side tasks are carried out here. This includes, for example, generating outputs and handling user inputs. Section 2.2 deals with this part of the app. The code of these two components can be placed inside a single file, <code>app.R</code>. This file must return an object created by the<code>shinyApp()</code> function. However, for larger applications an individual <code>ui.R</code> and <code>server.R</code> file can be used, to give the code base a cleaner structure. The following examples shows the code layout and function calls for a standalone Shiny app implemented in a single <code>app.R</code> file.
+A Shiny app essentially consists of two components, each of which can be implemented as a function in R. The first one being the UI function containing everything in terms of app layout, themes and control elements. This part of the app will be covered in section 2.1. The second part of a Shiny app consists of yet another function, the so called server function. All server-side tasks are carried out here. This includes, for example, generating outputs and handling user inputs. Section 2.2 deals with this part of the app. The code of these two components can be placed inside a single file, <code>app.R</code>. This file must return an object created by the<code>shinyApp()</code> function. However, for larger applications an individual <code>ui.R</code> and <code>server.R</code> file can be used, to give the code base a cleaner structure. The following example shows the code layout and function calls for a standalone Shiny app implemented in a single <code>app.R</code> file.
 
 ```{r, eval = FALSE}
 # Define UI for application. 
@@ -54,38 +58,746 @@ shinyApp(ui = ui, server = server)
 
 ```
 
-## 2.1 Adding controls - UI
+## Adding controls - UI
 
-There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI Layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
+There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
 
-The second group of functions are the UI Input functions. These functions are used to create user interface elements that prompt the user for input values or interaction, such as checkboxes, sliders or drop-down menus for example.
+The second group of functions are the UI input functions. These functions are used to create user interface elements that prompt the user for input values or interaction, such as checkboxes, sliders or drop-down menus for example.
+
+
+
+This allows us to pass on values for variables directly from the user to the server logic. To fulfill this purpose, all input functions have the same first argument <code>inputId</code> which is an unique identifier string for the input value. If one creates an input function with <code>inputId = "my_control"</code>, this can be accessed in the server function with <code>input\$my_control</code>. Looking at the slider example form above, the code of choosing a value between $0$ and $2$, labeled with _"slider"_ is given below. 
 
 ```{r, eval = FALSE}
-checkboxInput("example1", "checkbox", FALSE)
-selectInput("example2", label = "drop-down-menu",
-              choices = c("A", "B", "C", "D"), selected = "A")
-sliderInput("example3", label = "slider",
+sliderInput(inputId = "my_slider", label = "slider",
               min = 0, max = 2, value = 1, step = 0.1)
 ```
 
-The last group of functions are the UI output functions. They create user interface elements that, in conjunction from server side rendering function display different kinds of output from the application, like plots or tables.
+The last group of functions are the UI output functions. They create user interface elements that, in conjunction with server side rendering function, display different kinds of output from the application, like text, plots or tables. They are used in a similar manner to the input functions. Each output function therefore has the same first argument <code>outputId</code>, again representing an unique identifier string. These identifiers are then used in the server function like <code>output$my_output</code> paired with a <code>render()</code> function to process and display the output. The code below gives an example of how to integrate text, a plot and a table in the layout of the shiny app.
 
-## 2.2 Adding behavior - server
+```{r, eval = FALSE}
+textOutput(outputId = "my_text")
+plotOutput(outputId = "my_plot")
+tableOutput(outputId = "my_table")
+```
 
-The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}.
+The following section will give a brief overview of combining the UI elements from this section with more logic and interacting with the variable values.
 
-#### Extra: Using Shiny in documents - interactive documents
+## Adding behavior - server
+
+The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}. We will use the <code>input</code> and <code>output</code> arguments of our <code>server()</code> function to pass the elements of our <code>ui</code> object to each other. First consider the slider example from the previous section. Let's say, one would like to display the chosen number as a simple text object in the app. We can achieve it by using the following code. In the server function we add the <code>output\$my_text</code> object, which is linked to the UI component via the unique identifier string <code>"my_text"</code> as a member of the <code>output</code> argument. Furthermore we use the <code>renderText()</code> function, since we want to display plain text. Here <code>input\$my_slider</code> is used to fetch the number on the slider from the user input.
+
+
+#### Extra: Using Shiny in documents - interactive documents {.unlisted .unnumbered}
 
 There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019].
 
-## 2.3 Deploying the app
+## Deploying the app
 
-After one has completed the work on an app, the question of how the software can go into production in order to reach the users must be answered. Shiny and RStudio are therefore offering a few solutions. The simplest way of running a R Shiny app is by doing it locally on your own computer. Here, a R and Shiny installation are required. A more common solution is to deploy the Shiny app to the web. The advantages of this option are that one can reach a larger target group and that end users only need a web browser to run the app. Rolling out on a server can be done using the ShinyServer software from RStudio. A Linux server or cloud-based Linux server is required for this. A simpler solution can be achieved via Shinyapps.io, a cloud hosting services by RStudio. This has the advantage that the developer doesn't need to take care of the hardware and the installation of the server. Only the app code needs to be transferred to the Shinyapps.io service. There are different price models for this deploying method - including a free solution. More on this topic can be found [here](https://shiny.rstudio.com/deploy/){target="_blank"}.
+After one has completed the work on an app, the question of how the software can go into production in order to reach the users must be answered. Shiny and RStudio are therefore offering a few solutions. The simplest way of running an R Shiny app is by doing it locally on your own computer. Here, an R and Shiny installation are required. A more common solution is to deploy the Shiny app to the web. The advantages of this option are that one can reach a larger target group and that end users only need a web browser to run the app. Rolling out on a server can be done using the ShinyServer software from RStudio. A Linux server or cloud-based Linux server is required for this. A simpler solution can be achieved via Shinyapps.io, a cloud hosting services by RStudio. This has the advantage that the developer doesn't need to take care of the hardware and the installation of the server. Only the app code needs to be transferred to the Shinyapps.io service. There are different price models for this deploying method - including a free solution. More on this topic can be found [here](https://shiny.rstudio.com/deploy/){target="_blank"}.
 
-# 3. Examples
+# Examples
 
-### code description will follow.
+In this section we will present some examples of shiny apps, which were written by us.
+The first example will be a distribution plotter to show that shiny apps can be written in
+just a few lines of code. The second example is an interactive regression to show
+the statistical capabilities of shiny. The final app is a Covid-19 dashboard to show
+the visualization capabilities and the accessibility of data in shiny.
 
-# 4. Conclusion
+## Distribution plotter
+
+As stated above the first example is a distribution plotter. It is an application which can draw the density functions of different distributions. The chosen distributions for the application are beta distribution, normal distribution and t distribution. 
+
+```{r, eval=FALSE}
+library(shiny)
+
+# Define UI for application that draws different distributions
+ui <- fluidPage(
+    
+    # Application title
+    titlePanel("Distribution plotter"),
+
+```
+
+After installing and loading the shiny package the UI has to be defined. This includes the whole layout and in particular the interactive elements which in this case is a dropdown menu and sliders.
+The function <code>fluidPage</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A Fluid page layout is not fix but scale its components depending on the window size.
+After determining the superior layout, the layout in particular can be set.
+
+```{r, eval=FALSE}
+# Sidebar with different distr. / params 
+sidebarLayout(
+    sidebarPanel(
+        selectInput("distr",
+                    label = "Which distribution?",
+                    choices = c("Beta", "Normal", "t"), selected="Beta"),
+```
+
+<code>sidebarLayout</code> defines that on the left side a sidebar can be created using the function <code>sidebarPanel</code> and on the right side the main area which includes the visualization using the function <code>mainPanel</code>. The sidebar includes a dropdown menu which is created with <code>selectInput</code>. In this menu a distribution can be selected - normal, beta or t. Furthermore, the sidebar includes sliders where the values of the parameters can be chosen. 
+
+```{r, eval=FALSE}
+conditionalPanel(
+    condition = "input.distr == 'Beta'",
+    sliderInput(
+        "alpha",
+        "Value of Alpha",
+        1,
+        10,
+        1,
+        step = 1)
+),
+conditionalPanel(
+    condition = "input.distr == 'Beta'",
+    sliderInput(
+        "beta",
+        "Value of Beta",
+        1,
+        10,
+        1,
+        step = 1)
+),
+conditionalPanel(
+    condition = "input.distr == 'Normal'",
+    sliderInput(
+        "mu",
+        "Value of Mu",
+        -10,
+        10,
+        0,
+        step = 1)
+),
+conditionalPanel(
+    condition = "input.distr == 'Normal'",
+    sliderInput(
+        "sigma",
+        "Value of Sigma",
+        1,
+        10,
+        1,
+        step = 1)
+),
+conditionalPanel(
+    condition = "input.distr == 't'",
+    sliderInput(
+        "t_DF",
+        "Degrees of freedom",
+        1,
+        10,
+        1,
+        step = 1)
+)
+```
+
+The sliders are created with the function <code>conditionalPanel</code> - depending on which distribution was chosen in the dropdown menu above, the parameters and their value range are vary.
+
+For the beta-distribution which is defined as follows:
+
+\begin{align*}
+&X \sim {\sf Beta}(\alpha, \beta) \\
+&p(x|\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}x^{\alpha -1}(1-x)^{\beta -1} \: for \: 0 < x < 1 \\
+&with \: \alpha,\beta > 0
+\end{align*}
+
+the parameters are alpha and beta. For the sliders we chose a value range between 1 and 10 for each.
+
+For the normaldistribution
+
+\begin{align*}
+&X \sim {\sf N}(\mu, \sigma^2) \\
+&p(x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}exp\{-\frac{1}{2\sigma^2}(x-\mu)^2\} \: for \: x \in R \\
+&with \: \mu \in R \: and \: \sigma^2 > 0
+\end{align*}
+
+we decided that the value of mu can be chosen in the range between -10 and 10 and the value of sigma in the range of 1 to 10.
+
+The t-distribution is depending on the degrees of freedom nu.
+
+\begin{align*}
+&X \sim {\sf t_\nu}\\
+&p(x|\nu) = \frac{\Gamma \frac{\nu + 1}{2}}{\sqrt{\nu\pi}\Gamma \frac{\nu}{2}}(1+\frac{x^2}{\nu})^{-\frac{\nu+1}{2}} \: for \: x \in R \\
+&with \: \nu \in N
+\end{align*}
+
+For the t-distribution the number of the degrees of freedom can be choosen in a range from 1 to 10.
+After creating the sidebar, the main panel has to be defined.
+
+```{r, eval=FALSE}
+# Show a plot of the generated distribution
+mainPanel(
+    plotOutput("plot")
+)
+```
+
+With the function <code>mainPanel(plotOutput("plot"))</code> a place for the visualisation of each distribution depending on the chosen justifications is created next to the sidebar. 
+Now that the UI is completely defined, the server logic has to be set.
+
+```{r, eval=FALSE}        
+# Define server logic required to draw distribution plots
+server <- function(input, output) {
+    pbeta <- seq(0,1,0.01)
+    pnormal <- seq(-10, 10, 0.01)
+    pt <- seq(-10, 10, 0.01)
+    output$plot <- renderPlot({
+        if (input$distr == "Beta"){
+            plot(pbeta, dbeta(pbeta, input$alpha, input$beta), 
+                 type="l", 
+                 ylab="Density",
+                 xlab ="X",
+                 col = 4)
+        } else if (input$distr == "Normal"){
+            plot(pnormal, dnorm(pnormal, input$mu, input$sigma), 
+                 type="l",
+                 ylab="Density",
+                 xlab ="X",
+                 col = 3)
+        } else if (input$distr == "t"){
+            plot(pt, dt(pt, input$t_DF), 
+                 type = "l",
+                 ylab="Density",
+                 xlab ="X",
+                 col = 2)
+        }
+    })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+The server logic is required to draw the distribution plots that shall be shown in the main panel. The plots are generated depending on the input given via the dropdown menu selection and the slider selection. 
+The reactive plots are rendered using <code>rendersPlot</code>.
+Via an <code>if</code> loop the selection of the kind of distribution in the dropdown menu is considered. Depending on the selected distribution the particular plots are created by determining the range of the x axis and the kind of distribution and considering the selected values for the parameters. Furthermore, the colors of the graphs is set and that lines are used to plot the data as well as the description of the y- and x-axis.
+Now the UI and also the server logic are defined which means that the app can run. The app can be seen down below.
+
+## Interactive Regression
+
+The application presented in this section is intended to clarify the interactive components in relation to statistical data analysis. The following app can calculate two linear models of the form 
+
+\begin{align*}
+y = \textbf{X}\beta + \epsilon
+\end{align*}
+
+for one data set simultaneously. The results can be compared directly. Therefore the _Akaike information criterion (AIC)_ is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a "better" model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions of each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.
+
+First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostenHousing</code> data set from the <code>mlbench</code> package.
+
+```{r, echo=TRUE}
+# Include shiny.
+if (!require("shiny")) install.packages("shiny")
+library(shiny)
+
+# Install the package containing the data.
+if (!require("mlbench")) install.packages("mlbench")
+library(mlbench)
+```
+
+The <code>BostenHousing</code> data set contains 506 census tracts of Boston from the 1970 census on 14 variables. The target being <code>medv</code> which represents the median value of owner-occupied homes in USD 1000's. 
+
+```{r, echo=TRUE, R.options=list(width = 400)}
+# Take a look at the data.
+data(BostonHousing)
+head(BostonHousing)
+```
+
+The rest of these variables should be interactively used to change our model specifications. Therefore we save the names of these variables in a vector. Also the target is saved in an R variable. We are using <code>length(colnames(BostonHousing))</code> for implicit indexing.
+
+```{r, eval=FALSE}
+target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
+```
+
+In the next step we implement a wrapper function <code>fitLinearModel</code> for the <code>lm()</code> function of R. The latter function is part of the R <code>stats</code> package and is used to fit linear models of the above form. The wrapper takes a <code>target</code> input argument, which represents the target variable of the linear model. The <code>variables</code> argument is used to pass the variables for the fit of the linear model. Furthermore, the full data set <code>dataset</code> and the percentage value <code>splitRate</code> of training data, split from the full set, is passed to the wrapper function. With the first two arguments we can dynamically build the <code>formula</code> object for the <code>lm()</code> function. Here, a <code>for</code> loop is used to put together the object. In the next block, the train/test split is performed. A seed is used to ensure reproducible results. With that together, we can now fit the model using the training data. After that we use <code>AIC()</code> to calculate the value of the Akaike information criterion. Predictions are then calculated via <code>predict()</code>, now using the test data. Lastly, the absolute error is calculated as the difference between the true values and the predicted values. All of the results are merged into a single <code>list()</code> return object for further use.
+
+```{r, eval=FALSE}
+fitLinearModel <- function(target, variables, dataset, splitRate){
+  # Fits a linear model for the provided target and
+  # variables of the passed data set. 
+  modelFormula <- paste0(target, " ~")
+  counter <- 0
+  
+  # Set up formula object for the linear model.
+  for (variable in variables){
+    if (counter == 0){
+      modelFormula <- paste0(modelFormula, " ", variable)
+    } else {
+      modelFormula <- paste0(modelFormula, " + ", variable)
+    }
+    counter <- counter + 1
+  }
+  
+  # Perform train/test split of the provided data set.
+  set.seed(420)
+  sampleSize <- floor(splitRate * nrow(dataset))
+  trainIdx <- sample(seq_len(nrow(dataset)), size = sampleSize)
+  trainData <- dataset[trainIdx, ]
+  testData <- dataset[-trainIdx, ]
+  
+  # Fit the linear model and calculate predictions.
+  modelFit <- lm(formula = modelFormula, data = trainData)
+  modelAIC <- AIC(modelFit)
+  modelPredictions <- predict(modelFit, newdata = testData)
+  modelPredictionError <- abs(modelPredictions - testData[target])
+  
+  result <- list(model = modelFit, 
+                 AIC = modelAIC, 
+                 predictions = modelPredictions, 
+                 predictionErrors = modelPredictionError,
+                 trueValues = testData[target])
+  
+  return(result)
+}
+```
+
+This is all of the pre processing needed for the app. We can now start to write the code for the shiny app. As always, we begin with the UI component of the app. For this app, we use the <code>fluidPage</code> layout. Some standard HTML <code>h1()</code>, <code>p()</code> tags are used to provied some information for the user as simple text on the page. After that, we add a slider to control the train/test split rate by using <code>sliderInput()</code>. Since we want to control two models and their variables simultaneously, we split the <code>fluidPage()</code> into two equally sized columns using <code>column()</code>. Each of the two columns contains a <code>checkboxGroupInput</code> and a <code>textOutput</code>. The first one being a list of selectable items representing our model variables. The latter is an interface for the text output, which will display the AIC value of the model. Finally a plot output placeholder is added by <code>plotOutput</code>.
+
+```{r, eval=FALSE}
+ui <- fluidPage(
+  
+  h1("Interactive Linear Regression Models"),
+  
+  p("Use the checkboxes below to specifiy the variables for each of the two 
+    linear models. At least one variable must be selected for each model.
+    The train/test split rate can be controlled by the silder."),
+  
+  sliderInput("splitRate", "Select the percentage of training data (both models)", 
+              min = 0.1, max = 0.95, step = 0.05, value = 0.85),
+  
+  fluidRow(
+    column(6,
+           checkboxGroupInput("variablesModel1", "Choose variables for model 1:",
+                              selected = variables[1],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_1")
+    ),
+    
+    column(6,
+           checkboxGroupInput("variablesModel2", "Choose variables for model 2:",
+                              selected = variables[2],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_2")
+    )
+  ),
+  
+  plotOutput("plotPredictions")
+)
+```
+
+Again, the final component is the server function to define the logic of the app. We start by rendering the text output for the AIC values. We use <code>output\$modelAIC_1 <- renderText()</code> to wrap the calculation of the linear model. Inside this function the AIC result of the <code>fit</code> object is fetched for the text output. The same procedure can be applied for model two, but now using the input objects for the selection of model two. Finally, the plot is rendered using <code>output\$plotPredictions <- renderPlot()</code>. Here, both models are fitted and the return objects for setting up the plots are fetched. The data is plotted as points. To give some more context, spline interpolation is used to fit smooth curves through these points. Therefore the <code>spline()</code> function is used. 
+
+```{r, eval=FALSE}
+server <- function(input, output, session) {
+  # AIC output for model 1.
+  output$modelAIC_1 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 1: ", fit1[[2]]))
+  })
+  
+  # AIC output for model 2.
+  output$modelAIC_2 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 2: ", fit2[[2]]))
+  })
+  
+  # Plot output for both models.
+  output$plotPredictions <- renderPlot({
+    # Fit models
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    # Set up plot.
+    plot(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1], 
+         col = "blue", pch = 1, xlab = "Index", ylab = "Target", 
+         main = "Comparison of predicted test values and true values")
+    lines(spline(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1]), 
+          col = "blue")
+    points(c(1:length(fit1[[3]])), fit1[[3]], 
+           col = "red", pch = 2)
+    lines(spline(c(1:length(fit1[[3]])), fit1[[3]]), 
+          col = "red")
+    points(c(1:length(fit2[[3]])), fit2[[3]], 
+           col = "green", pch = 3)
+    lines(spline(c(1:length(fit2[[3]])), fit2[[3]]), 
+          col = "green")
+    legend(0, 50, legend = c("True values", "model 1", "model 2"), col = c("blue", "red", "green"), lty = 1)
+  })
+}
+```
+
+The complete app then has the following form.
+
+
+
+
+## Covid-19 Dashboard
+
+This application will be the most elaborate example. We wanted to create a dashboard that shows some relevant Covid-19 data,
+as it's still a relevant topic. We decided to include a map, which shows key data for each county, an interactive data table for users to explore the data and some plots about some more key data.
+
+Firstly, the required packages have to be installed and loaded.
+
+```{r, eval=FALSE}
+
+packages <- c("DT", "htmltools", "leaflet", "RColorBrewer", "sf", "shiny",
+              "shinythemes", "tidyverse")
+
+for (i in packages) { #Installs packages if not yet installed
+    if(! i %in% row.names(installed.packages())) install.packages(i)
+}
+
+library(DT)
+library(htmltools)
+library(leaflet)
+library(RColorBrewer)
+library(sf)
+library(shiny)
+library(shinythemes)
+library(tidyverse)
+
+```
+
+The <code>packages</code> vector contains all packages that are used in this app. [DT](https://rstudio.github.io/DT/){target="_blank"} is a package which provides an R interface to the DataTables library, which is written in Javascript. It allows R data objects to be displayed as HTML-tables.
+[htmltools](https://rstudio.github.io/htmltools/){target="_blank"} is used to generate custom HTML using R code, which can be used to customize user interfaces. 
+[leaflet](https://rstudio.github.io/leaflet/){target="_blank"} integrates the equally named JavaScript library in R. It can be used to create interactive maps and customize them.
+RColorBrewer contains the color palettes which are used in various plots and outputs.
+The simple features or [sf](https://r-spatial.github.io/sf/articles/sf1.html){target="_blank"} is used to read spatial data like GIS or GeoJSON.
+Shiny and shinythemes create the graphical user interface and its design, while the [tidyverse](https://www.tidyverse.org/){target="_blank"} packages are used for data wrangling and plotting (ggplot2).
+
+After preparing the necessary packages we have to load our data into R. The "[RKI Corona Landkreise](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0/about){target="_blank"}" from the Robert-Koch-Institute was used, because it contains all the key data for each county in Germany. 
+
+```{r, eval=FALSE}
+load_geodata <- function(geodata_url, save_flag=FALSE) {
+  # Try to read geo data from the provided URL.
+  # If reading fails, an older local copy is used.
+  # Set save_flag = TRUE to replace the local copy
+  # with newer data.
+  tryCatch(
+    expr = {
+      geodata <<- read_sf(geodata_url)
+    }, 
+    error = function(e) {
+      print(paste0("Error: Failed to read data from online source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    },
+    warning = function(w) {
+      print(paste0("Warning: Failed to parse data from JSON source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    }
+  )
+  
+  if (save_flag) {
+    # Saving data object in RData format.
+    save(geodata, file = "geodata.RData")
+  }
+}
+
+
+# Get geo data from online source.
+geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson"
+load_geodata(geodata_url, save_flag = FALSE)
+```
+
+The data is provided as GeoJSON file and can be accessed by using an API link provided on the website. The <code>load_geodata</code> acts as an error handler. After running the code for the first time the data will be saved as RData object, which can be used as substitute data in case the API can't be reached. As the data is provided as GeoJSON file, the easiest way to read the data into R is by using the <code>read_sf</code> function from the sf package.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#installing / loading sf to load the data
+if (!require("sf")) install.packages("sf")
+library(sf)
+
+load_geodata <- function(geodata_url, save_flag=FALSE) {
+  # Try to read geo data from the provided URL.
+  # If reading fails, an older local copy is used.
+  # Set save_flag = TRUE to replace the local copy
+  # with newer data.
+  tryCatch(
+    expr = {
+      geodata <<- read_sf(geodata_url)
+    }, 
+    error = function(e) {
+      print(paste0("Error: Failed to read data from online source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    },
+    warning = function(w) {
+      print(paste0("Warning: Failed to parse data from JSON source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    }
+  )
+  
+  if (save_flag) {
+    # Saving data object in RData format.
+    save(geodata, file = "geodata.RData")
+  }
+}
+
+
+# Get geo data from online source.
+geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson"
+load_geodata(geodata_url, save_flag = FALSE)
+
+str(geodata)
+```
+
+As can be seen by the output of the <code>str</code> command, our data has 48 variables and 412 observations. A lot of the variables are not of interest for this project and contain different IDs for example. The shape and geometry data can also be seen, the latter being contained in another list inside of the dataframe.
+
+Now that the data is ready to be used, some more things have to be prepared. 
+
+```{r, eval=FALSE}
+#color-palette for polygons (leaflet map)
+pal <-colorNumeric(
+  palette = "YlGn",
+  domain = geodata$cases7_per_100k,
+  reverse = T
+)
+
+
+#labels for polygons (leaflet map)
+labs <- as.list(paste0("<b>Informations</b> <br>", 
+                       "<b>Name:</b> ", geodata$GEN, "<br>",
+                       "<b>Population:</b> ", geodata$EWZ, "<br>",
+                       "<b>State:</b> ", geodata$BL, "<br>",
+                       "<b>Cases per 100.000 (7 Days):</b> ", round(geodata$cases7_per_100k,2), "<br>",
+                       "<b>Cases (total):</b> ", geodata$cases, "<br>",
+                       "<b>Deaths (total):</b> ", geodata$deaths))
+```
+
+A color palette and labels have to be created for the leaflet map. The <code>pal</code> vector contains a custom color palette with yellow and green tones that are scaled to the value of the cases per 100.000 in the last 7 days. The <code>labs</code> vector contains the information that is displayed on the tags. Labels of leaflet objects can contain HTML, which is why <code>b</code> is used for bold text and <code>br</code> is used for line breaks.
+
+```{r, eval=FALSE}
+#States for selectInput()
+bl <- sort(unique(geodata$BL))
+```
+
+Next, a vector <code>bl</code> was created, containing the names of all states in Germany. This vector is used in the dropdown menu to choose a state.
+
+```{r, eval=FALSE}
+#subset geodata for easier use
+gdata <- geodata %>% as_tibble() %>% 
+  select(c(BL, EWZ_BL, BEZ, GEN, EWZ, cases, cases_per_100k, 
+           cases7_per_100k, deaths, death_rate))
+```
+
+As seen above, our data <code>geodata</code> contains all the geometry that is used for the map and a lot of variables, which are not really important for this app, which is why the <code>gdata</code> subset was created. The <code>as_tibble</code> function removes the geometry information and turns our data into a tibble dataframe, while <code>select</code> selects the variables of interest.
+
+After preparing everything needed, the UI of the dashboard can be programmed.
+
+```{r, eval=FALSE}
+ui <-  navbarPage(theme = shinytheme("flatly"), 
+                 "Covid-19 in Germany",
+                 tabPanel("Map",
+                          fillPage(
+                            leafletOutput("c19map", height = 1000)
+                            )
+                          ),
+                 tabPanel("Table",
+                          fluidPage(
+                            DTOutput("tbl"),
+                            style = "height:1000px; overflow-y: scroll;overflow-x: scroll;"
+                            )
+                          ),
+                 tabPanel("Plots",
+                          fluidRow(
+                            column(6,
+                                   selectInput("region", 
+                                               label = "Choose a state of Germany", 
+                                               choices = c("Germany (total)", bl),
+                                               selected = "Germany (total)"))
+                            ),
+                          fluidRow(column(4,
+                                          plotOutput("piechart"),
+                                          plotOutput("c7_hi")),
+                                   column(4,
+                                          plotOutput("c_hi"),
+                                          plotOutput("c_lo")),
+                                   column(4,
+                                          plotOutput("d_hi"),
+                                          plotOutput("d_lo"))
+                            )
+                          )
+                        )
+```
+
+<code>navbarPage</code> creates a layout with a navigation bar on the top of the dashboard. The shinytheme "flatly" is used, which changes the visuals of the UI. The title is set by the string "Covid-19 in Germany". After creating the navbar layout, the function <code>tabPanel</code> is used to create tabs within the layout. This app contains three tabs. The first tab is labeled "Map" and contains the interactive leaflet map. <code>fillPage</code> creates a window that will always fill the browser window. The map object is labeled "c19map" and a height of 1000 pixels is set. It is rendered by the <code>leafletOutput</code> function. The second tab contains the datatable. The window is created by <code>fluidPage</code> which is used to create fluid layouts consisting of rows and columns. A fluid layout is chosen to enable scrolling. The table object is labeled "tbl". It is labeled by the <code>DTOutput</code> function. Furthermore, the height is set to 1000 pixels and the contents are made scrollable on the x- and y-axis if the content overflows the app. The last tab contains the plots. It consists of two fluid rows. The first row contains the dropdown menu which is created with <code>selectInput</code> and lets the user choose a state. The second row contains the different plots in three columns. The columns are 4 units wide each, which make them take up the whole horizontal space (12 units). The plots are rendered by the <code>plotOutput</code> function.
+This is all the code that is needed for the UI. Next the server functions have to be defined.
+
+```{r, eval=FALSE}
+output$c19map <- renderLeaflet({
+    leaflet(geodata) %>% 
+      addTiles() %>% 
+      addPolygons(stroke = F, smoothFactor = 0.2, fillOpacity = 0.3,
+                  color = ~pal(cases7_per_100k)
+      ) %>% 
+      addLegend(position = "topright", pal = pal, values = ~cases7_bl_per_100k,
+                title = "Cases per 100.000 (last 7 days) </br> '7-day-incidence'"
+      ) %>% 
+      addPolygons(stroke = T, weight = 0.5, color = "black", 
+                  label = lapply(labs, HTML),
+                  labelOptions = labelOptions(textsize = "12px"))
+  })
+```
+
+The first element of the app that will be defined is also on the mainpage of the shiny app. The output for the "c19map" leaflet map element is created by the <code>renderLeaflet</code> function. In this function a leaflet map is created by <code>leaflet(geodata)</code>. <code>addTiles</code> adds OpenStreetMap tiles to the object. The first <code>addPolygons</code> adds the color to the counties, using the palette that was specified above and is scaled by the number of cases each country had per 100.000 inhabitants in the last 7 days. <code>addLegend</code> adds a legend in the top-right corner of the map. HTML can be used for strings as leaflet is based on HTML. The second <code>addPolygons</code>
+adds labels and black borders to the counties. The labeltext specified above was used.
+
+```{r, eval=FALSE}
+output$tbl <- renderDT({
+    datatable(gdata %>% select(c(-2,-3)) %>% mutate(across(c(5,6,8), round, 2)),
+              rownames = F,
+              colnames = c("State", "County", "Population", "Cases",
+                           "Cases per 100.000", "Cases per 100.000 (last 7 days)", 
+                           "Deaths", "Deathrate"))
+  })
+```
+
+The second element of the navbar is the datatable. It was created by the <code>renderDT</code> function.
+Fitting variables were chosen via the <code>select</code> command and numeric variables were rounded to two decimals using the <code>round</code> command inside <code>mutate</code>. Furthermore, the names of the columns were changed to a more user-friendly description using the <code>colnames</code> command inside <code>mutate</code>.
+
+Lastly the plots were created for the last tab within our navbar.
+
+```{r, eval=FALSE}
+output$piechart <- renderPlot({
+    #piechart
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        mutate(sumcases = sum(cases)) %>% 
+        mutate(BL = fct_lump_n(BL, n=5, w=sumcases)) %>% 
+        group_by(BL) %>%
+        summarise(cases_sum = sum(cases)) %>% 
+        mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>% 
+        ggplot(., aes(x="", y=percentage, fill=BL)) + 
+        geom_bar(stat = "identity") +
+        coord_polar("y", start = 0) +
+        theme_void() + 
+        theme(legend.position = "bottom", legend.direction = "horizontal") +
+        scale_fill_brewer(palette = "Pastel2") +
+        geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                  position = position_stack(vjust = 0.5), size=3) + 
+        labs(title = "Percentage of the states in total number of cases",
+             subtitle = "Top 5 and rest",
+             fill = "")
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        gdata %>% mutate(BL = as.factor(ifelse(BL==bundesland, bundesland, "other"))) %>% 
+          group_by(BL) %>%
+          summarise(cases_sum = sum(cases)) %>% 
+          mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>%
+          ggplot(., aes(x="", y=percentage, fill=reorder(BL, percentage))) + 
+          geom_bar(stat = "identity") +
+          coord_polar("y", start = 0) +
+          theme_void() + 
+          theme(legend.position = "bottom", legend.direction = "horizontal") +
+          scale_fill_brewer(palette = "Pastel2") +
+          geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                    position = position_stack(vjust = 0.5), size=3) + 
+          labs(title = paste("Percentage of", bundesland, "in total number of cases"),
+               subtitle = "compared to all other states",
+               fill = "")
+      }
+    }
+  })
+```
+
+The first plot on the page is a pie chart, showing either the percentages of the top 5 states in total number of cases in Germany or the percentage of a state in total number of cases compared to Germany as a whole. What is shown is decided by the dropdown menu input on the page. If "Germany (total)" is chosen, the top 5 states will be displayed. It is created by the <code>renderPlot</code> function. For that, the data of the states outside the top 5 had to be grouped. This is done by the <code>fct_lump_n</code> command. Next the data was grouped, summarized and a percentage variable was created. A pie chart can't be created directly using <code>ggplot2</code>. It can however be created by defining a bar plot using <code>geom_bar</code> and making the bar plot object circular using <code>coord_polar</code>. The theme was set to "void" using <code>theme_void</code> because it keeps the background of the plot white and removes the axis. The palette was set in <code>scale_fill_brewer</code>, while the percentage numbers and labels were created by <code>geom_text</code> and <code>labs</code> respectively. If a specific state is chosen in the dropdown menu, the data manipulation varies a bit compared to the manipulation of the data for Germany as a whole. The manipulation is specific to each state and is changed with an <code>if</code> statement. After that the variable "BL" containing all the states is changed to a factor variable, where the chosen state is the first and "other" is the second factor. The rest of the code (i.e., the ggplot2 code for the pie chart) is equal to the one explained above.
+
+The remaining plots were all created equally with just the data manipulation and some text differing between them. Because of that only one of the remaining plots will be explained in full length.
+
+```{r, eval=FALSE}
+output$c7_hi <- renderPlot({
+    #plot of LKs with highest c7/100k
+    if (input$region == "Germany (total)"){
+      
+      xLabs <- gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        select(4) %>% pull()
+      
+      gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+        geom_col(aes(fill=cases7_per_100k)) + 
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=90,hjust=1)) +
+        labs(title = "Cases per 100.000 (last 7 days)",
+             subtitle = "Counties with the highest 7-day-incidence",  
+             x="County", 
+             y="", fill="Cases per 100.000") +
+        scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        
+        xLabs <- gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>%
+          select(4) %>% pull()
+        
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+          geom_col(aes(fill=cases7_per_100k)) + 
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=90,hjust=1)) +
+          labs(title = "Cases per 100.000 (last 7 days)",
+               subtitle = "Counties with the highest 7-day-incidence", 
+               x="County", 
+               y="", fill="Cases per 100.000") +
+          scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      }
+    }
+  })
+```
+
+The plot explained can be seen in the middle of the upper row in the "Plots"-tab. It shows the counties with the highest amount of cases per 100.000 inhabitants in the last 7 days. If the dropdown menu item "Germany (total)" is selected the counties with the top 5 highest values of entire Germany will be displayed, if a state is chosen the counties with the top 5 values within the state are displayed. The plot is again created by the <code>renderPlot</code> function. Firstly, a character vector <code>xLabs</code> is created for the labels. Why this is needed will be explained a little later. Then the data is arranged in descending order of cases per 100.000 in the last 7 days and the top 5 counties are chosen. Then a bar plot is created using <code>geom_col</code>. Because some cities are counties and have the same name as the county surrounding them (i.e., Bamberg city and Bamberg county) the type of county (city/not city/etc.) and the name of the county were pasted together to prevent inconsistent plotting and stacking of the data. This is why the <code>xLabs</code> object had to be created. It is used for the x-axis text and makes it easier to read by "reversing" the combination of both strings. The data was also ordered from highest to lowest inside of the plot using <code>reorder</code>. The <code>scale_fill_distiller</code> function was used to color the plot and scale the color with the value. The theme "classic" was set using <code>theme_classic</code> and was chosen for aesthetic reasons. The x-axis text was rotated 90 degrees and a line break function for better readability using <code>angle</code> inside the <code>theme</code> function and <code>str_wrap</code> inside the <code>scale_x_discrete</code> function. The legend and title were added in the <code>labs</code> function. If a state is selected the creation of the plot is done equally except the data manipulation. Here the data is first filtered by the selected state using an <code>if</code> statement and <code>filter</code>. The rest of the code remains the same except some strings for the legend.
+
+As stated above, the other plots were all created in the same way except using other <code>arrange</code> or <code>filter</code> functions and different labels. The code for the other plots can be found in the source code of our [GitHub](https://github.com/SvenNekula/Shiny-Dashboards){target="_blank"}-repository.
+
+After explaining all the elements of the app in detail, the entire app can be seen below.
+
+
+# Conclusion
 
 # References

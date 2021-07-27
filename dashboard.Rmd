@@ -2,7 +2,10 @@
 title: "Advanced Data Analysis with R: Shiny dashboards."
 author: "Sven Nekula, Minke Preckel, Joshua Simon"
 date: "`r format(Sys.time(), '%d.%m.%Y')`"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    number_sections: true
 runtime: shiny
 bibliography: literature.bib
 link-citations: yes
@@ -12,7 +15,7 @@ link-citations: yes
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# 1. Introduction - What is Shiny?
+# Introduction - What is Shiny?
 
 Shiny is an R package that allows the user to create interactive web apps. Just like other [popular R packages](https://www.rstudio.com/products/rpackages/){target="_blank"}, including the tidyverse packages, it was created by members of the RStudio team and was first released as version 0.2.3 on December 1st 2012. The most current version is 1.6.0 and was released on January 25th 2021. Further information on the current and past versions can be found [here](https://www.rdocumentation.org/packages/shiny/versions/1.6.0){target="_blank"}.
 
@@ -22,9 +25,10 @@ It also introduced a new style of programming. **_Reactive programming_** keeps 
 
 Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
 
-## Motivation etc - PLACEHOLDER
+In the first section the structure and functions of shiny apps will be explained. 
+After that, some examples of shiny apps and their respective codes will be presented.
 
-# 2. Structure of a Shiny app
+# Structure of a Shiny app
 
 In this section we will show the structure behind apps that are created with Shiny. Before users can start to work with Shiny, they have to install and load the package.
 
@@ -55,7 +59,7 @@ shinyApp(ui = ui, server = server)
 
 ```
 
-## 2.1 Adding controls - UI
+## Adding controls - UI
 
 There are three groups of functions that can be used to design the user interface of a Shiny app. The first group of functions are the UI layout functions which are used for laying out the user interface for the application. Users can decide if they want a page with a fixed layout using <code>fixedPage</code> or a fluid layout using <code>fluidPage</code>, create icons using <code>icon</code> or create a panel containing an application title using <code>titlePanel</code> for example.  
 
@@ -86,7 +90,7 @@ tableOutput(outputId = "my_table")
 
 The following section will give a brief overview of combining the UI elements from this section with more logic and interacting with the variable values.
 
-## 2.2 Adding behavior - server
+## Adding behavior - server
 
 The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}. We will use the <code>input</code> and <code>output</code> arguments of our <code>server()</code> function to pass the elements of our <code>ui</code> object to each other. First consider the slider example from the previous section. Let's say, one would like to display the chosen number as a simple text object in the app. We can achieve it by using the following code. In the server function we add the <code>output\$my_text</code> object, which is linked to the UI component via the unique identifier string <code>"my_text"</code> as a member of the <code>output</code> argument. Furthermore we use the <code>renderText()</code> function, since we want to display plain text. Here <code>input\$my_slider</code> is used to fetch the number on the slider from the user input.
 ```{r, eval=FALSE}
@@ -123,21 +127,25 @@ output$my_text <- renderText({
   })
 ```
 
-#### Extra: Using Shiny in documents - interactive documents
+#### Extra: Using Shiny in documents - interactive documents {.unlisted .unnumbered}
 
 There are two ways to include interactive Shiny elements in a document. You can either directly add widgets and rendered output in the document or you can embed a standalone Shiny app within the document [@GROLEMUND.2014; @Xie.2019].
 
-## 2.3 Deploying the app
+## Deploying the app
 
 After one has completed the work on an app, the question of how the software can go into production in order to reach the users must be answered. Shiny and RStudio are therefore offering a few solutions. The simplest way of running an R Shiny app is by doing it locally on your own computer. Here, an R and Shiny installation are required. A more common solution is to deploy the Shiny app to the web. The advantages of this option are that one can reach a larger target group and that end users only need a web browser to run the app. Rolling out on a server can be done using the ShinyServer software from RStudio. A Linux server or cloud-based Linux server is required for this. A simpler solution can be achieved via Shinyapps.io, a cloud hosting services by RStudio. This has the advantage that the developer doesn't need to take care of the hardware and the installation of the server. Only the app code needs to be transferred to the Shinyapps.io service. There are different price models for this deploying method - including a free solution. More on this topic can be found [here](https://shiny.rstudio.com/deploy/){target="_blank"}.
 
-# 3. Examples
+# Examples
 
 In this section we will present some examples of shiny apps, which were written by us.
+The first example will be a distribution plotter to show that shiny apps can be written in
+just a few lines of code. The second example is an interactive regression to show
+the statistical capabilities of shiny. The final app is a Covid-19 dashboard to show
+the visualization capabilities and the accessibility of data in shiny.
 
-## 3.1 Distribution plotter
+## Distribution plotter
 
-As a first example for an application that can be created with Shiny we decided to construct a distribution plotter. It is an application which can draw the density functions of different distributions. The chosen distributions for the application are beta distribution, normal distribution and t distribution. 
+As stated above the first example is a distribution plotter. It is an application which can draw the density functions of different distributions. The chosen distributions for the application are beta distribution, normal distribution and t distribution. 
 
 ```{r, eval=FALSE}
 library(shiny)
@@ -150,7 +158,7 @@ ui <- fluidPage(
 
 ```
 
-After installing and loading the shiny package, as always in the Shiny app at first the user interface, the UI, has to be defined. This includes the whole layout and in particular the interactive elements which in this case is a dropdown menu and sliders.
+After installing and loading the shiny package the UI has to be defined. This includes the whole layout and in particular the interactive elements which in this case is a dropdown menu and sliders.
 The function <code>fluidPage</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A Fluid page layout is not fix but scale its components depending on the window size.
 After determining the superior layout, the layout in particular can be set.
 
@@ -297,7 +305,7 @@ shinyApp(ui = ui, server = server)
 The server logic is required to draw the distribution plots that shall be shown in the main panel. The plots are generated depending on the input given via the dropdown menu selection and the slider selection. 
 The reactive plots are rendered using <code>rendersPlot</code>.
 Via an <code>if</code> loop the selection of the kind of distribution in the dropdown menu is considered. Depending on the selected distribution the particular plots are created by determining the range of the x axis and the kind of distribution and considering the selected values for the parameters. Furthermore, the colors of the graphs is set and that lines are used to plot the data as well as the description of the y- and x-axis.
-Now the UI and also the server logic is defined which means that the app can run and be seen down below.
+Now the UI and also the server logic are defined which means that the app can run. The app can be seen below.
 
 ```{r, echo=FALSE}
 
@@ -404,10 +412,10 @@ server <- function(input, output) {
 }
 
 # Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, options = list(height=470))
 ```
 
-## 3.2 Interactive Regression
+## Interactive Regression
 
 The application presented in this section is intended to clarify the interactive components in relation to statistical data analysis. The following app can calculate two linear models of the form 
 
@@ -746,7 +754,7 @@ shinyApp(ui, server, options = list(width="110%", height=1000)  )
 
 
 
-## 3.3 Covid-19 Dashboard
+## Covid-19 Dashboard
 
 This application will be the most elaborate example. We wanted to create a dashboard that shows some relevant Covid-19 data,
 as it's still a relevant topic. We decided to include a map, which shows key data for each county, an interactive data table for users to explore the data and some plots about some more key data.
@@ -1557,6 +1565,6 @@ shinyApp(
 ```
 
 
-# 4. Conclusion
+# Conclusion
 
 # References
