@@ -134,7 +134,7 @@ the visualization capabilities and the accessibility of data in shiny.
 
 ## Distribution plotter
 
-As stated above the first example is a distribution plotter. It is an application which can draw the density functions of different distributions. The chosen distributions for the application are beta distribution, normal distribution and t distribution. 
+As stated above the first example is a distribution plotter. It is an application which can draw the density functions of different distributions. The chosen distributions for the application are beta distribution, normal distribution and $t$-distribution. 
 
 ```{r, eval=FALSE}
 library(shiny)
@@ -148,7 +148,7 @@ ui <- fluidPage(
 ```
 
 After installing and loading the shiny package the UI has to be defined. This includes the whole layout and in particular the interactive elements which in this case is a dropdown menu and sliders.
-The function <code>fluidPage</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A Fluid page layout is not fix but scale its components depending on the window size.
+The function <code>fluidPage()</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A Fluid page layout is not fix but scale its components depending on the window size.
 After determining the superior layout, the layout in particular can be set.
 
 ```{r, eval=FALSE}
@@ -160,7 +160,7 @@ sidebarLayout(
                     choices = c("Beta", "Normal", "t"), selected="Beta"),
 ```
 
-<code>sidebarLayout</code> defines that on the left side a sidebar can be created using the function <code>sidebarPanel</code> and on the right side the main area which includes the visualization using the function <code>mainPanel</code>. The sidebar includes a dropdown menu which is created with <code>selectInput</code>. In this menu a distribution can be selected - normal, beta or t. Furthermore, the sidebar includes sliders where the values of the parameters can be chosen. 
+<code>sidebarLayout()</code> defines that on the left side a sidebar can be created using the function <code>sidebarPanel()</code> and on the right side the main area which includes the visualization using the function <code>mainPanel()</code>. The sidebar includes a dropdown menu which is created with <code>selectInput()</code>. In this menu a distribution can be selected - normal, beta or t. Furthermore, the sidebar includes sliders where the values of the parameters can be chosen. 
 
 ```{r, eval=FALSE}
 conditionalPanel(
@@ -215,37 +215,38 @@ conditionalPanel(
 )
 ```
 
-The sliders are created with the function <code>conditionalPanel</code> - depending on which distribution was chosen in the dropdown menu above, the parameters and their value range are vary.
+The sliders are created with the function <code>conditionalPanel()</code> - depending on which distribution was chosen in the dropdown menu above, the parameters and their value range are vary.
 
 For the beta-distribution which is defined as follows:
 
 \begin{align*}
-&X \sim {\sf Beta}(\alpha, \beta) \\
-&p(x|\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}x^{\alpha -1}(1-x)^{\beta -1} \: for \: 0 < x < 1 \\
-&with \: \alpha,\beta > 0
+& X \sim {\sf Beta}(\alpha, \beta) \\
+& p(x|\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}x^{\alpha -1}(1-x)^{\beta -1} \: \text{for} \: 0 < x < 1 \\
+& \text{with} \: \alpha,\beta > 0
 \end{align*}
 
-the parameters are alpha and beta. For the sliders we chose a value range between 1 and 10 for each.
+the parameters are $\alpha$ and $\beta$. For the sliders we chose a value range between $1$ and $10$ for each.
 
 For the normal distribution
 
 \begin{align*}
-&X \sim {\sf N}(\mu, \sigma^2) \\
-&p(x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}exp\{-\frac{1}{2\sigma^2}(x-\mu)^2\} \: for \: x \in R \\
-&with \: \mu \in R \: and \: \sigma^2 > 0
+& X \sim \mathcal{N}\left( \mu, \sigma^2 \right) \\
+& p(x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}exp\left\{-\frac{1}{2\sigma^2}(x-\mu)^2\right\} \: \text{for} \: x \in R \\
+& \text{with} \: \mu \in \mathbb{R} \: \text{and} \: \sigma^2 > 0
 \end{align*}
 
-we decided that the value of mu can be chosen in the range between -10 and 10 and the value of sigma in the range of 1 to 10.
+we decided that the value of $\mu$ can be chosen in the range between $-10$ and $10$ and the value of $\sigma$ in the range of $1$ to $10$.
 
-The t-distribution is depending on the degrees of freedom nu.
+The $t$-distribution is depending on the degrees of freedom $\nu$.
 
 \begin{align*}
-&X \sim {\sf t_\nu}\\
-&p(x|\nu) = \frac{\Gamma \frac{\nu + 1}{2}}{\sqrt{\nu\pi}\Gamma \frac{\nu}{2}}(1+\frac{x^2}{\nu})^{-\frac{\nu+1}{2}} \: for \: x \in R \\
-&with \: \nu \in N
+& X \sim t_{\nu} \\
+& p(x|\nu) = \frac{\Gamma \left( \frac{\nu + 1}{2} \right)}{\sqrt{\nu\pi}\Gamma \left( \frac{\nu}{2} \right)}
+\left( 1+\frac{x^2}{\nu} \right)^{-\frac{\nu+1}{2}} \: \text{for} \: x \in \mathbb{R} \\
+& \text{with} \: \nu \in \mathbb{N}
 \end{align*}
 
-For the t-distribution the number of the degrees of freedom can be choosen in a range from 1 to 10.
+For the $t$-distribution the number of the degrees of freedom can be choosen in a range from $1$ to $10$.
 After creating the sidebar, the main panel has to be defined.
 
 ```{r, eval=FALSE}
@@ -292,8 +293,8 @@ shinyApp(ui = ui, server = server)
 ```
 
 The server logic is required to draw the distribution plots that shall be shown in the main panel. The plots are generated depending on the input given via the dropdown menu selection and the slider selection. 
-The reactive plots are rendered using <code>rendersPlot</code>.
-Via an <code>if</code> loop the selection of the kind of distribution in the dropdown menu is considered. Depending on the selected distribution the particular plots are created by determining the range of the x axis and the kind of distribution and considering the selected values for the parameters. Furthermore, the colors of the graphs is set and that lines are used to plot the data as well as the description of the y- and x-axis.
+The reactive plots are rendered using <code>rendersPlot()</code>.
+Via an <code>if</code> condition the selection of the kind of distribution in the dropdown menu is considered. Depending on the selected distribution the particular plots are created by determining the range of the $x$ axis and the kind of distribution and considering the selected values for the parameters. Furthermore, the colors of the graphs is set and that lines are used to plot the data as well as the description of the $y$- and $x$-axis.
 Now the UI and also the server logic are defined which means that the app can run. The app can be seen down below.
 
 ```{r distr, echo=FALSE,  out.width = '100%'}
@@ -339,7 +340,7 @@ target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
 variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
 ```
 
-In the next step we implement a wrapper function <code>fitLinearModel</code> for the <code>lm()</code> function of R. The latter function is part of the R <code>stats</code> package and is used to fit linear models of the above form. The wrapper takes a <code>target</code> input argument, which represents the target variable of the linear model. The <code>variables</code> argument is used to pass the variables for the fit of the linear model. Furthermore, the full data set <code>dataset</code> and the percentage value <code>splitRate</code> of training data, split from the full set, is passed to the wrapper function. With the first two arguments we can dynamically build the <code>formula</code> object for the <code>lm()</code> function. Here, a <code>for</code> loop is used to put together the object. In the next block, the train/test split is performed. A seed is used to ensure reproducible results. With that together, we can now fit the model using the training data. After that we use <code>AIC()</code> to calculate the value of the Akaike information criterion. Predictions are then calculated via <code>predict()</code>, now using the test data. Lastly, the absolute error is calculated as the difference between the true values and the predicted values. All of the results are merged into a single <code>list()</code> return object for further use.
+In the next step we implement a wrapper function <code>fitLinearModel()</code> for the <code>lm()</code> function of R. The latter function is part of the R <code>stats</code> package and is used to fit linear models of the above form. The wrapper takes a <code>target</code> input argument, which represents the target variable of the linear model. The <code>variables</code> argument is used to pass the variables for the fit of the linear model. Furthermore, the full data set <code>dataset</code> and the percentage value <code>splitRate</code> of training data, split from the full set, is passed to the wrapper function. With the first two arguments we can dynamically build the <code>formula</code> object for the <code>lm()</code> function. Here, a <code>for</code> loop is used to put together the object. In the next block, the train/test split is performed. A seed is used to ensure reproducible results. With that together, we can now fit the model using the training data. After that we use <code>AIC()</code> to calculate the value of the Akaike information criterion. Predictions are then calculated via <code>predict()</code>, now using the test data. Lastly, the absolute error is calculated as the difference between the true values and the predicted values. All of the results are merged into a single <code>list()</code> return object for further use.
 
 ```{r, eval=FALSE}
 fitLinearModel <- function(target, variables, dataset, splitRate){
@@ -381,7 +382,7 @@ fitLinearModel <- function(target, variables, dataset, splitRate){
 }
 ```
 
-This is all of the pre processing needed for the app. We can now start to write the code for the shiny app. As always, we begin with the UI component of the app. For this app, we use the <code>fluidPage</code> layout. Some standard HTML <code>h1()</code>, <code>p()</code> tags are used to provied some information for the user as simple text on the page. After that, we add a slider to control the train/test split rate by using <code>sliderInput()</code>. Since we want to control two models and their variables simultaneously, we split the <code>fluidPage()</code> into two equally sized columns using <code>column()</code>. Each of the two columns contains a <code>checkboxGroupInput</code> and a <code>textOutput</code>. The first one being a list of selectable items representing our model variables. The latter is an interface for the text output, which will display the AIC value of the model. Finally a plot output placeholder is added by <code>plotOutput</code>.
+This is all of the pre processing needed for the app. We can now start to write the code for the shiny app. As always, we begin with the UI component of the app. For this app, we use the <code>fluidPage()</code> layout. Some standard HTML <code>h1()</code>, <code>p()</code> tags are used to provied some information for the user as simple text on the page. After that, we add a slider to control the train/test split rate by using <code>sliderInput()</code>. Since we want to control two models and their variables simultaneously, we split the <code>fluidPage()</code> into two equally sized columns using <code>column()</code>. Each of the two columns contains a <code>checkboxGroupInput()</code> and a <code>textOutput()</code>. The first one being a list of selectable items representing our model variables. The latter is an interface for the text output, which will display the AIC value of the model. Finally a plot output placeholder is added by <code>plotOutput()</code>.
 
 ```{r, eval=FALSE}
 ui <- fluidPage(
@@ -480,7 +481,7 @@ server <- function(input, output, session) {
 
 The complete app then has the following form.
 
-```{r regression, echo=FALSE, fig.cap="A caption", out.width = '100%'}
+```{r regression, echo=FALSE, out.width = '100%'}
 knitr::include_graphics("img/regression.jpg")
 ```
 
@@ -839,5 +840,7 @@ knitr::include_graphics("img/C19_dashboard3.jpg")
 ```
 
 # Conclusion
+
+Nowadays there is a need for clear visualization and interactions with large amounts of data in almost every area. Dashboards that use simple controls to set filters or restrict the display to a specific area of interest are particularly popular. With this solution, a wide range of users can be offered an intuitive presentation of the facts. In addition to the already mentioned purpose for the end user, the possibilities of creating such a tool in the programming language R presented in this paper offer further advantages. The R shiny package provides the developer a simple interface to create a link between to the classic statistical work and the summarizing of the results in a dashboard or a web app. The user interface and the server logic behind it can be implemented with a few functions. This can be done entirely within R, so no further knowledge of other web technologies is required. The examples in this document show how versatile R Shiny apps and dashboards can be. In addition to the usual control elements known from websites and computer programs, tables and plots can also be inserted. Even the integration of interactive maps can be done relatively easily. In the age of the web, R Shiny solutions represent an easily configurable and fast solution for preparing the core content of a topic for various target groups.
 
 # References
