@@ -3,7 +3,8 @@ title: "Advanced Data Analysis with R: Shiny dashboards."
 author: "Sven Nekula, Minke Preckel, Joshua Simon"
 date: "`r format(Sys.time(), '%d.%m.%Y')`"
 output: 
-  html_document:
+  prettydoc::html_pretty:
+    theme: hpstr
     toc: true
     number_sections: true
 bibliography: literature.bib
