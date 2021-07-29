@@ -242,7 +242,7 @@ For the normal distribution
 
 \begin{align*}
 & X \sim \mathcal{N}\left( \mu, \sigma^2 \right) \\
-& p(x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}exp\left\{-\frac{1}{2\sigma^2}(x-\mu)^2\right\} \: \text{for} \: x \in R \\
+& p(x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}exp\left\{-\frac{1}{2\sigma^2}(x-\mu)^2\right\} \: \text{for} \: x \in \mathbb{R} \\
 & \text{with} \: \mu \in \mathbb{R} \: \text{and} \: \sigma^2 > 0
 \end{align*}
 
