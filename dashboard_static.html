@@ -159,7 +159,12 @@ a.sourceLine {
 <li><a href="#covid-19-dashboard"><span class="toc-section-number">3.3</span> Covid-19 Dashboard</a></li>
 </ul></li>
 <li><a href="#conclusion"><span class="toc-section-number">4</span> Conclusion</a></li>
-<li><a href="#appendix"><span class="toc-section-number">5</span> Appendix</a></li>
+<li><a href="#appendix"><span class="toc-section-number">5</span> Appendix</a>
+<ul>
+<li><a href="#code-of-distribution-plotter"><span class="toc-section-number">5.1</span> Code of distribution plotter</a></li>
+<li><a href="#code-of-interactive-regression"><span class="toc-section-number">5.2</span> Code of interactive regression</a></li>
+<li><a href="#code-of-covid-19-dashboard"><span class="toc-section-number">5.3</span> Code of Covid-19 dashboard</a></li>
+</ul></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
@@ -838,7 +843,8 @@ y = \textbf{X}\beta + \epsilon
 </div>
 <div id="appendix" class="section level1" number="5">
 <h1 number="5"><span class="header-section-number">5</span> Appendix</h1>
-<p>Code of distribution plotter:</p>
+<div id="code-of-distribution-plotter" class="section level2" number="5.1">
+<h2 number="5.1"><span class="header-section-number">5.1</span> Code of distribution plotter</h2>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(<span class="st">&quot;shiny&quot;</span>)) <span class="fu">install.packages</span>(<span class="st">&quot;shiny&quot;</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(shiny)</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -944,7 +950,9 @@ y = \textbf{X}\beta + \epsilon
 <span id="cb29-103"><a href="#cb29-103" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-104"><a href="#cb29-104" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the application </span></span>
 <span id="cb29-105"><a href="#cb29-105" aria-hidden="true" tabindex="-1"></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code></pre></div>
-<p>Code of interactive regression:</p>
+</div>
+<div id="code-of-interactive-regression" class="section level2" number="5.2">
+<h2 number="5.2"><span class="header-section-number">5.2</span> Code of interactive regression</h2>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># regression_app.R</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In this script the Boston housing data set is used</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># to predict the house price in Boston from house</span></span>
@@ -1101,7 +1109,9 @@ y = \textbf{X}\beta + \epsilon
 <span id="cb30-154"><a href="#cb30-154" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb30-155"><a href="#cb30-155" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-156"><a href="#cb30-156" aria-hidden="true" tabindex="-1"></a><span class="fu">shinyApp</span>(ui, server)</span></code></pre></div>
-<p>Code of Covid-19 dashboard:</p>
+</div>
+<div id="code-of-covid-19-dashboard" class="section level2" number="5.3">
+<h2 number="5.3"><span class="header-section-number">5.3</span> Code of Covid-19 dashboard</h2>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;DT&quot;</span>, <span class="st">&quot;htmltools&quot;</span>, <span class="st">&quot;leaflet&quot;</span>, <span class="st">&quot;RColorBrewer&quot;</span>, <span class="st">&quot;sf&quot;</span>, <span class="st">&quot;shiny&quot;</span>,</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;shinythemes&quot;</span>, <span class="st">&quot;tidyverse&quot;</span>)</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1557,6 +1567,7 @@ y = \textbf{X}\beta + \epsilon
 <span id="cb31-453"><a href="#cb31-453" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb31-454"><a href="#cb31-454" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb31-455"><a href="#cb31-455" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>

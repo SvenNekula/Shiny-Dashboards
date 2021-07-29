@@ -844,7 +844,7 @@ Nowadays there is a need for clear visualization and interactions with large amo
 
 # Appendix
 
-Code of distribution plotter:
+## Code of distribution plotter
 
 ```{r, eval=FALSE}
 if (!require("shiny")) install.packages("shiny")
@@ -954,7 +954,7 @@ server <- function(input, output) {
 shinyApp(ui = ui, server = server)
 ```
 
-Code of interactive regression:
+## Code of interactive regression
 
 ```{r, eval=FALSE}
 # regression_app.R
@@ -1115,7 +1115,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-Code of Covid-19 dashboard:
+## Code of Covid-19 dashboard
 
 ```{r, eval=FALSE}
 packages <- c("DT", "htmltools", "leaflet", "RColorBrewer", "sf", "shiny",
