@@ -129,8 +129,7 @@ After one has completed the work on an app, the question of how the software can
 In this section we will present some examples of shiny apps, which were written by us.
 The first example will be a distribution plotter to show that shiny apps can be written in
 just a few lines of code. The second example is an interactive regression to show
-the statistical capabilities of shiny. The final app is a Covid-19 dashboard to show
-the visualization capabilities and the accessibility of data in shiny.
+the statistical capabilities of shiny. The final app is a Covid-19 dashboard to show how shiny can be used to make data accessible to people without a programming or statistical background.
 
 ## Distribution plotter
 
@@ -147,9 +146,9 @@ ui <- fluidPage(
 
 ```
 
-After installing and loading the shiny package the UI has to be defined. This includes the whole layout and in particular the interactive elements which in this case is a dropdown menu and sliders.
-The function <code>fluidPage()</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A Fluid page layout is not fix but scale its components depending on the window size.
-After determining the superior layout, the layout in particular can be set.
+After installing and loading the shiny package the UI has to be defined. This includes the  layout and  the interactive elements. In this case  a dropdown menu and sliders.
+The function <code>fluidPage()</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A Fluid page layout is not fixed but scales its components depending on the window size.
+After determining which layout should be used, the layout can be set.
 
 ```{r, eval=FALSE}
 # Sidebar with different distr. / params 
@@ -215,7 +214,7 @@ conditionalPanel(
 )
 ```
 
-The sliders are created with the function <code>conditionalPanel()</code> - depending on which distribution was chosen in the dropdown menu above, the parameters and their value range are vary.
+The sliders are created with the function <code>conditionalPanel()</code>. Depending on which distribution was chosen in the dropdown menu above, the parameters and their value range vary.
 
 For the beta-distribution which is defined as follows:
 
@@ -225,7 +224,7 @@ For the beta-distribution which is defined as follows:
 & \text{with} \: \alpha,\beta > 0
 \end{align*}
 
-the parameters are $\alpha$ and $\beta$. For the sliders we chose a value range between $1$ and $10$ for each.
+the parameters are $\alpha$ and $\beta$. For the sliders we chose a value range between $1$ and $10$ for each parameter.
 
 For the normal distribution
 
@@ -235,9 +234,9 @@ For the normal distribution
 & \text{with} \: \mu \in \mathbb{R} \: \text{and} \: \sigma^2 > 0
 \end{align*}
 
-we decided that the value of $\mu$ can be chosen in the range between $-10$ and $10$ and the value of $\sigma$ in the range of $1$ to $10$.
+the value of $\mu$ was chosen to be in the range between $-10$ and $10$ and the value of $\sigma$ in the range of $1$ to $10$.
 
-The $t$-distribution is depending on the degrees of freedom $\nu$.
+The $t$-distribution depends on the degrees of freedom $\nu$.
 
 \begin{align*}
 & X \sim t_{\nu} \\
@@ -246,7 +245,7 @@ The $t$-distribution is depending on the degrees of freedom $\nu$.
 & \text{with} \: \nu \in \mathbb{N}
 \end{align*}
 
-For the $t$-distribution the number of the degrees of freedom can be choosen in a range from $1$ to $10$.
+For the $t$-distribution the degrees of freedom can be choosen from $1$ to $10$.
 After creating the sidebar, the main panel has to be defined.
 
 ```{r, eval=FALSE}
@@ -256,8 +255,8 @@ mainPanel(
 )
 ```
 
-With the function <code>mainPanel(plotOutput("plot"))</code> a place for the visualisation of each distribution depending on the chosen justifications is created next to the sidebar. 
-Now that the UI is completely defined, the server logic has to be set.
+With the function <code>mainPanel(plotOutput("plot"))</code> a plot is created next to the sidebar. The plot varies depending on the chosen distribution.
+Now that the UI is defined, the server logic has to be set.
 
 ```{r, eval=FALSE}        
 # Define server logic required to draw distribution plots
@@ -292,10 +291,10 @@ server <- function(input, output) {
 shinyApp(ui = ui, server = server)
 ```
 
-The server logic is required to draw the distribution plots that shall be shown in the main panel. The plots are generated depending on the input given via the dropdown menu selection and the slider selection. 
+The server logic is required to draw the distribution plots which are shown in the main panel. The plots are generated depending on the input given via the dropdown menu selection and the slider selection. 
 The reactive plots are rendered using <code>rendersPlot()</code>.
-Via an <code>if</code> condition the selection of the kind of distribution in the dropdown menu is considered. Depending on the selected distribution the particular plots are created by determining the range of the $x$ axis and the kind of distribution and considering the selected values for the parameters. Furthermore, the colors of the graphs is set and that lines are used to plot the data as well as the description of the $y$- and $x$-axis.
-Now the UI and also the server logic are defined which means that the app can run. The app can be seen down below.
+Via an <code>if</code> condition the selection of the  distribution in the dropdown menu is considered. Depending on the selected distribution the different plots are created by determining the range of the x axis and the type of distribution and considering the selected values for the parameters. Furthermore, the color of the graphs and the type of plot are set as well as the description of the $y$- and $x$-axis.
+Now the UI and also the server logic are defined which means that the app can run. The app can be seen below.
 
 ```{r distr, echo=FALSE,  out.width = '100%'}
 knitr::include_graphics("img/distribution1.jpg")
@@ -313,7 +312,7 @@ y = \textbf{X}\beta + \epsilon
 
 for one data set simultaneously. The results can be compared directly. Therefore the _Akaike information criterion (AIC)_ is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a "better" model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions of each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.
 
-First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostenHousing</code> data set from the <code>mlbench</code> package.
+First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostonHousing</code> data set from the <code>mlbench</code> package.
 
 ```{r, echo=TRUE}
 # Include shiny.
@@ -325,7 +324,7 @@ if (!require("mlbench")) install.packages("mlbench")
 library(mlbench)
 ```
 
-The <code>BostenHousing</code> data set contains 506 census tracts of Boston from the 1970 census on 14 variables. The target being <code>medv</code> which represents the median value of owner-occupied homes in USD 1000's. 
+The <code>BostonHousing</code> data set contains 506 census tracts of Boston from the 1970 census on 14 variables. The target being <code>medv</code> which represents the median value of owner-occupied homes in USD 1000's. 
 
 ```{r, echo=TRUE, R.options=list(width = 400)}
 # Take a look at the data.
@@ -559,7 +558,7 @@ geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a7
 load_geodata(geodata_url, save_flag = FALSE)
 ```
 
-The data is provided as GeoJSON file and can be accessed by using an API link provided on the website. The <code>load_geodata</code> acts as an error handler. After running the code for the first time the data will be saved as RData object, which can be used as substitute data in case the API can't be reached. As the data is provided as GeoJSON file, the easiest way to read the data into R is by using the <code>read_sf</code> function from the sf package.
+The data is provided as GeoJSON file and can be accessed by using an API link provided on the website. The <code>load_geodata()</code> acts as an error handler. After running the code for the first time the data will be saved as RData object, which can be used as substitute data in case the API can't be reached. As the data is provided as GeoJSON file, the easiest way to read the data into R is by using the <code>read_sf()</code> function from the sf package.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 #installing / loading sf to load the data
@@ -605,7 +604,7 @@ load_geodata(geodata_url, save_flag = FALSE)
 str(geodata)
 ```
 
-As can be seen by the output of the <code>str</code> command, our data has 48 variables and 412 observations. A lot of the variables are not of interest for this project and contain different IDs for example. The shape and geometry data can also be seen, the latter being contained in another list inside of the dataframe.
+As can be seen by the output of the <code>str()</code> command, our data has 48 variables and 412 observations. A lot of the variables are not of interest for this project and contain different IDs for example. The shape and geometry data can also be seen, the latter being contained in another list inside of the dataframe.
 
 Now that the data is ready to be used, some more things have to be prepared. 
 
@@ -644,7 +643,7 @@ gdata <- geodata %>% as_tibble() %>%
            cases7_per_100k, deaths, death_rate))
 ```
 
-As seen above, our data <code>geodata</code> contains all the geometry that is used for the map and a lot of variables, which are not really important for this app, which is why the <code>gdata</code> subset was created. The <code>as_tibble</code> function removes the geometry information and turns our data into a tibble dataframe, while <code>select</code> selects the variables of interest.
+As seen above, our data <code>geodata</code> contains all the geometry that is used for the map and a lot of variables, which are not really important for this app, which is why the <code>gdata</code> subset was created. The <code>as_tibble()</code> function removes the geometry information and turns our data into a tibble dataframe, while <code>select()</code> selects the variables of interest.
 
 After preparing everything needed, the UI of the dashboard can be programmed.
 
@@ -684,7 +683,7 @@ ui <-  navbarPage(theme = shinytheme("flatly"),
                         )
 ```
 
-<code>navbarPage</code> creates a layout with a navigation bar on the top of the dashboard. The shinytheme "flatly" is used, which changes the visuals of the UI. The title is set by the string "Covid-19 in Germany". After creating the navbar layout, the function <code>tabPanel</code> is used to create tabs within the layout. This app contains three tabs. The first tab is labeled "Map" and contains the interactive leaflet map. <code>fillPage</code> creates a window that will always fill the browser window. The map object is labeled "c19map" and a height of 1000 pixels is set. It is rendered by the <code>leafletOutput</code> function. The second tab contains the datatable. The window is created by <code>fluidPage</code> which is used to create fluid layouts consisting of rows and columns. A fluid layout is chosen to enable scrolling. The table object is labeled "tbl". It is labeled by the <code>DTOutput</code> function. Furthermore, the height is set to 1000 pixels and the contents are made scrollable on the x- and y-axis if the content overflows the app. The last tab contains the plots. It consists of two fluid rows. The first row contains the dropdown menu which is created with <code>selectInput</code> and lets the user choose a state. The second row contains the different plots in three columns. The columns are 4 units wide each, which make them take up the whole horizontal space (12 units). The plots are rendered by the <code>plotOutput</code> function.
+<code>navbarPage()</code> creates a layout with a navigation bar on the top of the dashboard. The shinytheme "flatly" is used, which changes the visuals of the UI. The title is set by the string "Covid-19 in Germany". After creating the navbar layout, the function <code>tabPanel()</code> is used to create tabs within the layout. This app contains three tabs. The first tab is labeled "Map" and contains the interactive leaflet map. <code>fillPage()</code> creates a window that will always fill the browser window. The map object is labeled "c19map" and a height of 1000 pixels is set. It is rendered by the <code>leafletOutput()</code> function. The second tab contains the datatable. The window is created by <code>fluidPage()</code> which is used to create fluid layouts consisting of rows and columns. A fluid layout is chosen to enable scrolling. The table object is labeled "tbl". It is labeled by the <code>DTOutput()</code> function. Furthermore, the height is set to 1000 pixels and the contents are made scrollable on the x- and y-axis if the content overflows the app. The last tab contains the plots. It consists of two fluid rows. The first row contains the dropdown menu which is created with <code>selectInput()</code> and lets the user choose a state. The second row contains the different plots in three columns. The columns are 4 units wide each, which make them take up the whole horizontal space (12 units). The plots are rendered by the <code>plotOutput()</code> function.
 This is all the code that is needed for the UI. Next the server functions have to be defined.
 
 ```{r, eval=FALSE}
@@ -703,7 +702,7 @@ output$c19map <- renderLeaflet({
   })
 ```
 
-The first element of the app that will be defined is also on the mainpage of the shiny app. The output for the "c19map" leaflet map element is created by the <code>renderLeaflet</code> function. In this function a leaflet map is created by <code>leaflet(geodata)</code>. <code>addTiles</code> adds OpenStreetMap tiles to the object. The first <code>addPolygons</code> adds the color to the counties, using the palette that was specified above and is scaled by the number of cases each country had per 100.000 inhabitants in the last 7 days. <code>addLegend</code> adds a legend in the top-right corner of the map. HTML can be used for strings as leaflet is based on HTML. The second <code>addPolygons</code>
+The first element of the app that will be defined is also on the mainpage of the shiny app. The output for the "c19map" leaflet map element is created by the <code>renderLeaflet()</code> function. In this function a leaflet map is created by <code>leaflet(geodata)</code>. <code>addTiles()</code> adds OpenStreetMap tiles to the object. The first <code>addPolygons()</code> adds the color to the counties, using the palette that was specified above and is scaled by the number of cases each country had per 100.000 inhabitants in the last 7 days. <code>addLegend()</code> adds a legend in the top-right corner of the map. HTML can be used for strings as leaflet is based on HTML. The second <code>addPolygons()</code>
 adds labels and black borders to the counties. The labeltext specified above was used.
 
 ```{r, eval=FALSE}
@@ -716,8 +715,8 @@ output$tbl <- renderDT({
   })
 ```
 
-The second element of the navbar is the datatable. It was created by the <code>renderDT</code> function.
-Fitting variables were chosen via the <code>select</code> command and numeric variables were rounded to two decimals using the <code>round</code> command inside <code>mutate</code>. Furthermore, the names of the columns were changed to a more user-friendly description using the <code>colnames</code> command inside <code>mutate</code>.
+The second element of the navbar is the datatable. It was created by the <code>renderDT()</code> function.
+Fitting variables were chosen via the <code>select()</code> command and numeric variables were rounded to two decimals using the <code>round</code> command inside <code>mutate()</code>. Furthermore, the names of the columns were changed to a more user-friendly description using the <code>colnames()</code> command inside <code>mutate()</code>.
 
 Lastly the plots were created for the last tab within our navbar.
 
@@ -768,7 +767,7 @@ output$piechart <- renderPlot({
   })
 ```
 
-The first plot on the page is a pie chart, showing either the percentages of the top 5 states in total number of cases in Germany or the percentage of a state in total number of cases compared to Germany as a whole. What is shown is decided by the dropdown menu input on the page. If "Germany (total)" is chosen, the top 5 states will be displayed. It is created by the <code>renderPlot</code> function. For that, the data of the states outside the top 5 had to be grouped. This is done by the <code>fct_lump_n</code> command. Next the data was grouped, summarized and a percentage variable was created. A pie chart can't be created directly using <code>ggplot2</code>. It can however be created by defining a bar plot using <code>geom_bar</code> and making the bar plot object circular using <code>coord_polar</code>. The theme was set to "void" using <code>theme_void</code> because it keeps the background of the plot white and removes the axis. The palette was set in <code>scale_fill_brewer</code>, while the percentage numbers and labels were created by <code>geom_text</code> and <code>labs</code> respectively. If a specific state is chosen in the dropdown menu, the data manipulation varies a bit compared to the manipulation of the data for Germany as a whole. The manipulation is specific to each state and is changed with an <code>if</code> statement. After that the variable "BL" containing all the states is changed to a factor variable, where the chosen state is the first and "other" is the second factor. The rest of the code (i.e., the ggplot2 code for the pie chart) is equal to the one explained above.
+The first plot on the page is a pie chart, showing either the percentages of the top 5 states in total number of cases in Germany or the percentage of a state in total number of cases compared to Germany as a whole. What is shown is decided by the dropdown menu input on the page. If "Germany (total)" is chosen, the top 5 states will be displayed. It is created by the <code>renderPlot()</code> function. For that, the data of the states outside the top 5 had to be grouped. This is done by the <code>fct_lump_n()</code> command. Next the data was grouped, summarized and a percentage variable was created. A pie chart can't be created directly using <code>ggplot2</code>. It can however be created by defining a bar plot using <code>geom_bar()</code> and making the bar plot object circular using <code>coord_polar()</code>. The theme was set to "void" using <code>theme_void()</code> because it keeps the background of the plot white and removes the axis. The palette was set in <code>scale_fill_brewer()</code>, while the percentage numbers and labels were created by <code>geom_text()</code> and <code>labs()</code> respectively. If a specific state is chosen in the dropdown menu, the data manipulation varies a bit compared to the manipulation of the data for Germany as a whole. The manipulation is specific to each state and is changed via <code>if</code> condition. After that the variable <code>BL</code> containing all the states is changed to a factor variable, where the chosen state is the first and "other" is the second factor. The rest of the code (i.e., the ggplot2 code for the pie chart) is equal to the one explained above.
 
 The remaining plots were all created equally with just the data manipulation and some text differing between them. Because of that only one of the remaining plots will be explained in full length.
 
@@ -827,9 +826,9 @@ output$c7_hi <- renderPlot({
   })
 ```
 
-The plot explained can be seen in the middle of the upper row in the "Plots"-tab. It shows the counties with the highest amount of cases per 100.000 inhabitants in the last 7 days. If the dropdown menu item "Germany (total)" is selected the counties with the top 5 highest values of entire Germany will be displayed, if a state is chosen the counties with the top 5 values within the state are displayed. The plot is again created by the <code>renderPlot</code> function. Firstly, a character vector <code>xLabs</code> is created for the labels. Why this is needed will be explained a little later. Then the data is arranged in descending order of cases per 100.000 in the last 7 days and the top 5 counties are chosen. Then a bar plot is created using <code>geom_col</code>. Because some cities are counties and have the same name as the county surrounding them (i.e., Bamberg city and Bamberg county) the type of county (city/not city/etc.) and the name of the county were pasted together to prevent inconsistent plotting and stacking of the data. This is why the <code>xLabs</code> object had to be created. It is used for the x-axis text and makes it easier to read by "reversing" the combination of both strings. The data was also ordered from highest to lowest inside of the plot using <code>reorder</code>. The <code>scale_fill_distiller</code> function was used to color the plot and scale the color with the value. The theme "classic" was set using <code>theme_classic</code> and was chosen for aesthetic reasons. The x-axis text was rotated 90 degrees and a line break function for better readability using <code>angle</code> inside the <code>theme</code> function and <code>str_wrap</code> inside the <code>scale_x_discrete</code> function. The legend and title were added in the <code>labs</code> function. If a state is selected the creation of the plot is done equally except the data manipulation. Here the data is first filtered by the selected state using an <code>if</code> statement and <code>filter</code>. The rest of the code remains the same except some strings for the legend.
+The plot explained can be seen in the middle of the upper row in the "Plots"-tab. It shows the counties with the highest amount of cases per 100.000 inhabitants in the last 7 days. If the dropdown menu item "Germany (total)" is selected the counties with the top 5 highest values of entire Germany will be displayed, if a state is chosen the counties with the top 5 values within the state are displayed. The plot is again created by the <code>renderPlot()</code> function. Firstly, a character vector <code>xLabs</code> is created for the labels. Why this is needed will be explained a little later. Then the data is arranged in descending order of cases per 100.000 in the last 7 days and the top 5 counties are chosen. Then a bar plot is created using <code>geom_col()</code>. Because some cities are counties and have the same name as the county surrounding them (i.e., Bamberg city and Bamberg county) the type of county (city/not city/etc.) and the name of the county were pasted together to prevent inconsistent plotting and stacking of the data. This is why the <code>xLabs</code> object had to be created. It is used for the x-axis text and makes it easier to read by "reversing" the combination of both strings. The data was also ordered from highest to lowest inside of the plot using <code>reorder()</code>. The <code>scale_fill_distiller()</code> function was used to color the plot and scale the color with the value. The theme "classic" was set using <code>theme_classic()</code> and was chosen for aesthetic reasons. The x-axis text was rotated 90 degrees and a line break function for better readability using <code>angle</code> inside the <code>theme()</code> function and <code>str_wrap()</code> inside the <code>scale_x_discrete()</code> function. The legend and title were added in the <code>labs()</code> function. If a state is selected the creation of the plot is done equally except the data manipulation. Here the data is first filtered by the selected state using an <code>if</code> condition and <code>filter()</code>. The rest of the code remains the same except some strings for the legend.
 
-As stated above, the other plots were all created in the same way except using other <code>arrange</code> or <code>filter</code> functions and different labels. The code for the other plots can be found in the source code of our [GitHub](https://github.com/SvenNekula/Shiny-Dashboards){target="_blank"}-repository.
+As stated above, the other plots were all created in the same way except using other <code>arrange()</code> or <code>filter()</code> functions and different labels. The code for the other plots can be found in the source code of our [GitHub](https://github.com/SvenNekula/Shiny-Dashboards){target="_blank"}-repository or in the appendix at the end.
 
 After explaining all the elements of the app in detail, the entire app can be seen below.
 
@@ -842,5 +841,738 @@ knitr::include_graphics("img/C19_dashboard3.jpg")
 # Conclusion
 
 Nowadays there is a need for clear visualization and interactions with large amounts of data in almost every area. Dashboards that use simple controls to set filters or restrict the display to a specific area of interest are particularly popular. With this solution, a wide range of users can be offered an intuitive presentation of the facts. In addition to the already mentioned purpose for the end user, the possibilities of creating such a tool in the programming language R presented in this paper offer further advantages. The R shiny package provides the developer a simple interface to create a link between to the classic statistical work and the summarizing of the results in a dashboard or a web app. The user interface and the server logic behind it can be implemented with a few functions. This can be done entirely within R, so no further knowledge of other web technologies is required. The examples in this document show how versatile R Shiny apps and dashboards can be. In addition to the usual control elements known from websites and computer programs, tables and plots can also be inserted. Even the integration of interactive maps can be done relatively easily. In the age of the web, R Shiny solutions represent an easily configurable and fast solution for preparing the core content of a topic for various target groups.
+
+# Appendix
+
+Code of distribution plotter:
+
+```{r, eval=FALSE}
+if (!require("shiny")) install.packages("shiny")
+library(shiny)
+
+# Define UI for application that draws different distributions
+ui <- fluidPage(
+    
+    # Application title
+    titlePanel("Distribution plotter"),
+    
+    # Sidebar with different distr. / params 
+    sidebarLayout(
+        sidebarPanel(
+            selectInput("distr",
+                        label = "Which distribution?",
+                        choices = c("Beta", "Normal", "t"), selected="Beta"),
+            conditionalPanel(
+                condition = "input.distr == 'Beta'",
+                sliderInput(
+                    "alpha",
+                    "Value of Alpha",
+                    1,
+                    10,
+                    1,
+                    step = 1)
+            ),
+            conditionalPanel(
+                condition = "input.distr == 'Beta'",
+                sliderInput(
+                    "beta",
+                    "Value of Beta",
+                    1,
+                    10,
+                    1,
+                    step = 1)
+            ),
+            conditionalPanel(
+                condition = "input.distr == 'Normal'",
+                sliderInput(
+                    "mu",
+                    "Value of Mu",
+                    -10,
+                    10,
+                    0,
+                    step = 1)
+            ),
+            conditionalPanel(
+                condition = "input.distr == 'Normal'",
+                sliderInput(
+                    "sigma",
+                    "Value of Sigma",
+                    1,
+                    10,
+                    1,
+                    step = 1)
+            ),
+            conditionalPanel(
+                condition = "input.distr == 't'",
+                sliderInput(
+                    "t_DF",
+                    "Degrees of freedom",
+                    1,
+                    10,
+                    1,
+                    step = 1)
+            )
+        ),
+        
+        # Show a plot of the generated distribution
+        mainPanel(
+            plotOutput("plot")
+        )
+        
+    )
+)
+
+# Define server logic required to draw distribution plots
+server <- function(input, output) {
+    pbeta <- seq(0,1,0.01)
+    pnormal <- seq(-10, 10, 0.01)
+    pt <- seq(-10, 10, 0.01)
+    output$plot <- renderPlot({
+        if (input$distr == "Beta"){
+            plot(pbeta, dbeta(pbeta, input$alpha, input$beta), 
+                 type="l", 
+                 ylab="Density",
+                 xlab ="X",
+                 col = 4)
+        } else if (input$distr == "Normal"){
+            plot(pnormal, dnorm(pnormal, input$mu, input$sigma), 
+                 type="l",
+                 ylab="Density",
+                 xlab ="X",
+                 col = 3)
+        } else if (input$distr == "t"){
+            plot(pt, dt(pt, input$t_DF), 
+                 type = "l",
+                 ylab="Density",
+                 xlab ="X",
+                 col = 2)
+        }
+    })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+Code of interactive regression:
+
+```{r, eval=FALSE}
+# regression_app.R
+# In this script the Boston housing data set is used
+# to predict the house price in Boston from house
+# details. This is the foundation of an interactive
+# shiny dashboard where you can compare two types 
+# of linear models. A discription of the data can be
+# found here:
+# https://www.rdocumentation.org/packages/mlbench/versions/2.1-3/topics/BostonHousing
+
+
+# Include shiny.
+if (!require("shiny")) install.packages("shiny")
+library(shiny)
+
+# Install the package containing the data.
+if (!require("mlbench")) install.packages("mlbench")
+
+
+fitLinearModel <- function(target, variables, dataset, splitRate){
+  # Fits a linear model for the provided target and
+  # variables of the passed data set. 
+  modelFormula <- paste0(target, " ~")
+  counter <- 0
+  
+  # Set up formula object for the linear model.
+  for (variable in variables){
+    if (counter == 0){
+      modelFormula <- paste0(modelFormula, " ", variable)
+    } else {
+      modelFormula <- paste0(modelFormula, " + ", variable)
+    }
+    counter <- counter + 1
+  }
+  
+  # Perform train/test split of the provided data set.
+  set.seed(420)
+  sampleSize <- floor(splitRate * nrow(dataset))
+  trainIdx <- sample(seq_len(nrow(dataset)), size = sampleSize)
+  trainData <- dataset[trainIdx, ]
+  testData <- dataset[-trainIdx, ]
+  
+  # Fit the linear model and calculate predictions.
+  modelFit <- lm(formula = modelFormula, data = trainData)
+  modelAIC <- AIC(modelFit)
+  modelPredictions <- predict(modelFit, newdata = testData)
+  modelPredictionError <- abs(modelPredictions - testData[target])
+  
+  result <- list(model = modelFit, 
+                 AIC = modelAIC, 
+                 predictions = modelPredictions, 
+                 predictionErrors = modelPredictionError,
+                 trueValues = testData[target])
+  
+  return(result)
+}
+
+
+### Shiny app ###
+### --------- ###
+
+# Load the data set.
+library(mlbench)
+data(BostonHousing)
+
+# Global scope
+target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+variables <- colnames(BostonHousing)[1:(length(colnames(BostonHousing)) - 1)]
+
+
+ui <- fluidPage(
+  
+  h1("Interactive Linear Regression Models"),
+  
+  p("Use the checkboxes below to specifiy the variables for each of the two 
+    linear models. At least one variable must be selected for each model.
+    The train/test split rate can be controlled by the silder."),
+  
+  sliderInput("splitRate", "Select the percentage of training data (both models)", 
+              min = 0.1, max = 0.95, step = 0.05, value = 0.85),
+  
+  fluidRow(
+    column(6,
+           checkboxGroupInput("variablesModel1", "Choose variables for model 1:",
+                              selected = variables[1],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_1")
+    ),
+    
+    column(6,
+           checkboxGroupInput("variablesModel2", "Choose variables for model 2:",
+                              selected = variables[2],
+                              choiceNames =
+                                variables,
+                              choiceValues =
+                                variables
+           ),
+           
+           textOutput("modelAIC_2")
+    )
+  ),
+  
+  plotOutput("plotPredictions")
+)
+
+server <- function(input, output, session) {
+  output$modelAIC_1 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 1: ", fit1[[2]]))
+  })
+  
+  output$modelAIC_2 <- renderText({
+    # Fit model
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    print(paste0("AIC of model 2: ", fit2[[2]]))
+  })
+  
+  output$plotPredictions <- renderPlot({
+    # Fit models
+    target <- colnames(BostonHousing)[length(colnames(BostonHousing))]
+    variables1 <- input$variablesModel1
+    fit1 <- fitLinearModel(target, variables1, BostonHousing, input$splitRate)
+    
+    variables2 <- input$variablesModel2
+    fit2 <- fitLinearModel(target, variables2, BostonHousing, input$splitRate)
+    
+    # Set up plot.
+    plot(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1], 
+         col = "blue", pch = 1, xlab = "Index", ylab = "Target", 
+         main = "Comparison of predicted test values and true values")
+    lines(spline(c(1:length(fit1[[5]][, 1])), fit1[[5]][, 1]), 
+          col = "blue")
+    points(c(1:length(fit1[[3]])), fit1[[3]], 
+           col = "red", pch = 2)
+    lines(spline(c(1:length(fit1[[3]])), fit1[[3]]), 
+          col = "red")
+    points(c(1:length(fit2[[3]])), fit2[[3]], 
+           col = "green", pch = 3)
+    lines(spline(c(1:length(fit2[[3]])), fit2[[3]]), 
+          col = "green")
+    legend(0, 50, legend = c("True values", "model 1", "model 2"), col = c("blue", "red", "green"), lty = 1)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+Code of Covid-19 dashboard:
+
+```{r, eval=FALSE}
+packages <- c("DT", "htmltools", "leaflet", "RColorBrewer", "sf", "shiny",
+              "shinythemes", "tidyverse")
+
+for (i in packages) { #Installs packages if not yet installed
+    if(! i %in% row.names(installed.packages())) install.packages(i)
+}
+
+library(DT)
+library(htmltools)
+library(leaflet)
+library(RColorBrewer)
+library(sf)
+library(shiny)
+library(shinythemes)
+library(tidyverse)
+
+load_geodata <- function(geodata_url, save_flag=FALSE) {
+  # Try to read geo data from the provided URL.
+  # If reading fails, an older local copy is used.
+  # Set save_flag = TRUE to replace the local copy
+  # with newer data.
+  tryCatch(
+    expr = {
+      geodata <<- read_sf(geodata_url)
+    }, 
+    error = function(e) {
+      print(paste0("Error: Failed to read data from online source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    },
+    warning = function(w) {
+      print(paste0("Warning: Failed to parse data from JSON source: ", geodata_url))
+      print("Using local data set instead.")
+      save_flag <<- FALSE
+      load("geodata.RData")
+      geodata <<- geodata
+    }
+  )
+  
+  if (save_flag) {
+    # Saving data object in RData format.
+    save(geodata, file = "geodata.RData")
+  }
+}
+
+
+# Get geo data from online source.
+geodata_url <- "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.geojson"
+load_geodata(geodata_url, save_flag = FALSE)
+
+
+#color-palette for polygons (leaflet map)
+pal <-colorNumeric(
+  palette = "YlGn",
+  domain = geodata$cases7_per_100k,
+  reverse = T
+)
+
+
+#labels for polygons (leaflet map)
+labs <- as.list(paste0("<b>Informations</b> <br>", 
+                       "<b>Name:</b> ", geodata$GEN, "<br>",
+                       "<b>Population:</b> ", geodata$EWZ, "<br>",
+                       "<b>State:</b> ", geodata$BL, "<br>",
+                       "<b>Cases per 100.000 (7 Days):</b> ", round(geodata$cases7_per_100k,2), "<br>",
+                       "<b>Cases (total):</b> ", geodata$cases, "<br>",
+                       "<b>Deaths (total):</b> ", geodata$deaths))
+
+
+#States for selectInput()
+bl <- sort(unique(geodata$BL))
+
+#subset geodata for easier use
+gdata <- geodata %>% as_tibble() %>% 
+  select(c(BL, EWZ_BL, BEZ, GEN, EWZ, cases, cases_per_100k, 
+           cases7_per_100k, deaths, death_rate))
+
+shinyApp(
+  
+  ui <-  navbarPage(theme = shinytheme("flatly"), 
+                 "Covid-19 in Germany",
+                 tabPanel("Map",
+                          fillPage(
+                            leafletOutput("c19map", height = 1000)
+                            )
+                          ),
+                 tabPanel("Table",
+                          fluidPage(
+                            DTOutput("tbl"),
+                            style = "height:1000px; overflow-y: scroll;overflow-x: scroll;"
+                            )
+                          ),
+                 tabPanel("Plots",
+                          fluidRow(
+                            column(6,
+                                   selectInput("region", 
+                                               label = "Choose a state of Germany", 
+                                               choices = c("Germany (total)", bl),
+                                               selected = "Germany (total)"))
+                            ),
+                          fluidRow(column(4,
+                                          plotOutput("piechart"),
+                                          plotOutput("c7_hi")),
+                                   column(4,
+                                          plotOutput("c_hi"),
+                                          plotOutput("c_lo")),
+                                   column(4,
+                                          plotOutput("d_hi"),
+                                          plotOutput("d_lo"))
+                            )
+                          )
+                        ),
+  
+  server <- function(input, output) {
+  
+  output$c19map <- renderLeaflet({
+    #leaflet map
+    leaflet(geodata) %>% 
+      addTiles() %>% 
+      addPolygons(stroke = F, smoothFactor = 0.2, fillOpacity = 0.3,
+                  color = ~pal(cases7_per_100k)
+      ) %>% 
+      addLegend(position = "topright", pal = pal, values = ~cases7_bl_per_100k,
+                title = "Cases per 100.000 (last 7 days) </br> '7-day-incidence'"
+      ) %>% 
+      addPolygons(stroke = T, weight = 0.5, color = "black", 
+                  label = lapply(labs, HTML),
+                  labelOptions = labelOptions(textsize = "12px"))
+  })
+  
+  output$tbl <- renderDT({
+    #interactive data table
+    datatable(gdata %>% select(c(-2,-3)) %>% mutate(across(c(5,6,8), round, 2)),
+              rownames = F,
+              colnames = c("State", "County", "Population", "Cases",
+                           "Cases per 100.000", "Cases per 100.000 (last 7 days)", 
+                           "Deaths", "Deathrate"))
+  })
+  
+  
+  output$piechart <- renderPlot({
+    #piechart
+    if (input$region == "Germany (total)"){
+      gdata %>% 
+        mutate(sumcases = sum(cases)) %>% 
+        mutate(BL = fct_lump_n(BL, n=5, w=sumcases)) %>% 
+        group_by(BL) %>%
+        summarise(cases_sum = sum(cases)) %>% 
+        mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>% 
+        ggplot(., aes(x="", y=percentage, fill=BL)) + 
+        geom_bar(stat = "identity") +
+        coord_polar("y", start = 0) +
+        theme_void() + 
+        theme(legend.position = "bottom", legend.direction = "horizontal") +
+        scale_fill_brewer(palette = "Pastel2") +
+        geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                  position = position_stack(vjust = 0.5), size=3) + 
+        labs(title = "Percentage of the states in total number of cases",
+             subtitle = "Top 5 and rest",
+             fill = "")
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        gdata %>% mutate(BL = as.factor(ifelse(BL==bundesland, bundesland, "other"))) %>% 
+          group_by(BL) %>%
+          summarise(cases_sum = sum(cases)) %>% 
+          mutate(percentage = round(cases_sum/sum(cases_sum)*100, digits = 2)) %>%
+          ggplot(., aes(x="", y=percentage, fill=reorder(BL, percentage))) + 
+          geom_bar(stat = "identity") +
+          coord_polar("y", start = 0) +
+          theme_void() + 
+          theme(legend.position = "bottom", legend.direction = "horizontal") +
+          scale_fill_brewer(palette = "Pastel2") +
+          geom_text(aes(label=paste0(percentage, "%"), x=1.3), 
+                    position = position_stack(vjust = 0.5), size=3) + 
+          labs(title = paste("Percentage of", bundesland, "in total number of cases"),
+               subtitle = "compared to all other states",
+               fill = "")
+      }
+    }
+  })
+  
+  
+  output$c7_hi <- renderPlot({
+    #plot of LKs with highest c7/100k
+    if (input$region == "Germany (total)"){
+      
+      xLabs <- gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        select(4) %>% pull()
+      
+      gdata %>% 
+        arrange(desc(cases7_per_100k)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+        geom_col(aes(fill=cases7_per_100k)) + 
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=90,hjust=1)) +
+        labs(title = "Cases per 100.000 (last 7 days)",
+             subtitle = "Counties with the highest 7-day-incidence",  
+             x="County", 
+             y="", fill="Cases per 100.000") +
+        scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        
+        xLabs <- gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>%
+          select(4) %>% pull()
+        
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases7_per_100k)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases7_per_100k), y=cases7_per_100k)) + 
+          geom_col(aes(fill=cases7_per_100k)) + 
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=90,hjust=1)) +
+          labs(title = "Cases per 100.000 (last 7 days)",
+               subtitle = "Counties with the highest 7-day-incidence", 
+               x="County", 
+               y="", fill="Cases per 100.000") +
+          scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      }
+    }
+  })
+  
+  output$c_hi <- renderPlot({
+    #plot of LKs with highest cases
+    if (input$region == "Germany (total)"){
+      
+      xLabs <- gdata %>% 
+        arrange(desc(cases)) %>% 
+        slice(1:5) %>%
+        select(4) %>% pull()
+      
+      gdata %>% 
+        arrange(desc(cases)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases), y=cases)) + 
+        geom_col(aes(fill=cases)) +
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=90,hjust=1)) +
+        labs(title = "Cases (total)",
+             subtitle = "Counties with the highest number of cases", 
+             x="County", 
+             y="", fill="Total cases") +
+        scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        
+        xLabs <- gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases)) %>% 
+          slice(1:5) %>% 
+          select(4) %>% pull()
+        
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(cases)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -cases), y=cases)) + 
+          geom_col(aes(fill=cases)) +
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=90,hjust=1)) +
+          labs(title = "Cases (total)",
+               subtitle = "Counties with the highest number of cases", 
+               x="County", 
+               y="", fill="Total cases") +
+          scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      }
+    }
+  })
+  
+  output$c_lo <- renderPlot({
+    #plot of LKs with lowest cases
+    if (input$region == "Germany (total)"){
+      
+      xLabs <- gdata %>% 
+        arrange(cases) %>% 
+        slice(1:5) %>%
+        select(4) %>% pull()
+      
+      gdata %>% 
+        arrange(cases) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), cases), y=cases)) + 
+        geom_col(aes(fill=cases)) +
+        scale_fill_distiller(palette = "Greens", direction = -1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=90,hjust=1)) +
+        labs(title = "Cases (total)",
+             subtitle = "Counties with the lowest number of cases", 
+             x="County", 
+             y="", fill="Total cases") +
+        scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        
+        xLabs <- gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(cases) %>% 
+          slice(1:5) %>% 
+          select(4) %>% pull()
+        
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(cases) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), cases), y=cases)) + 
+          geom_col(aes(fill=cases)) +
+          scale_fill_distiller(palette = "Greens", direction = -1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=90,hjust=1)) +
+          labs(title = "Cases (total)",
+               subtitle = "Counties with the lowest number of cases", 
+               x="County", 
+               y="", fill="Total cases") +
+          scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      }
+    }
+  })
+  
+  output$d_hi <- renderPlot({
+    #plot of LKs with highest deaths
+    if (input$region == "Germany (total)"){
+      
+      xLabs <- gdata %>% 
+        arrange(desc(deaths)) %>% 
+        slice(1:5) %>%
+        select(4) %>% pull()
+      
+      gdata %>% 
+        arrange(desc(deaths)) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), -deaths), y=deaths)) + 
+        geom_col(aes(fill=deaths)) +
+        scale_fill_distiller(palette = "Reds", direction = 1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=90,hjust=1)) +
+        labs(title = "Deaths (total)",
+             subtitle = "Counties with the highest number of deaths", 
+             x="County", 
+             y="", fill="Total deaths") +
+        scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        
+        xLabs <- gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(deaths)) %>% 
+          slice(1:5) %>%
+          select(4) %>% pull()
+        
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(desc(deaths)) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), -deaths), y=deaths)) + 
+          geom_col(aes(fill=deaths)) +
+          scale_fill_distiller(palette = "Reds", direction = 1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=90,hjust=1)) +
+          labs(title = "Deaths (total)",
+               subtitle = "Counties with the highest number of deaths", x="County", 
+               y="", fill="Total deaths") +
+          scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      }
+    }
+  })
+  
+  output$d_lo <- renderPlot({
+    #plot of LKs with lowest deaths
+    if (input$region == "Germany (total)"){
+      
+      xLabs <- gdata %>% 
+        arrange(deaths) %>% 
+        slice(1:5) %>% 
+        select(4) %>% pull()
+      
+      gdata %>% 
+        arrange(deaths) %>% 
+        slice(1:5) %>% 
+        ggplot(., aes(x=reorder(paste(BEZ, GEN), deaths), y=deaths)) + 
+        geom_col(aes(fill=deaths)) +
+        scale_fill_distiller(palette = "Greens", direction = -1) +
+        theme_classic() +
+        theme(axis.text.x=element_text(angle=90,hjust=1)) +
+        labs(title = "Deaths (total)",
+             subtitle = "Counties with the lowest number of deaths", 
+             x="County", 
+             y="", fill="Total deaths") +
+        scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      
+    } else {
+      
+      bundesland <- input$region
+      
+      if (input$region == bundesland){
+        
+        xLabs <- gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(deaths) %>% 
+          slice(1:5) %>%
+          select(4) %>% pull()
+        
+        gdata %>% 
+          filter(BL == bundesland) %>% 
+          arrange(deaths) %>% 
+          slice(1:5) %>% 
+          ggplot(., aes(x=reorder(paste(BEZ, GEN), deaths), y=deaths)) + 
+          geom_col(aes(fill=deaths)) +
+          scale_fill_distiller(palette = "Greens", direction = -1) +
+          theme_classic() +
+          theme(axis.text.x=element_text(angle=90,hjust=1)) +
+          labs(title = "Deaths (total)",
+               subtitle = "Counties with the lowest number of deaths", 
+               x="County", 
+               y="", fill="Total deaths") +
+          scale_x_discrete(labels = function(x) str_wrap(xLabs, width = 10))
+      }
+    }
+  })
+  
+  
+}
+)
+```
 
 # References
