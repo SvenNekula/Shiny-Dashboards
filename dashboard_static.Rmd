@@ -88,7 +88,7 @@ The following section will give a brief overview of combining the UI elements fr
 
 ## Adding behavior - server
 
-The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}. We will use the <code>input</code> and <code>output</code> arguments of our <code>server()</code> function to pass the elements of our <code>ui</code> object to each other. First consider the slider example from the previous section. Let's say, one would like to display the chosen number as a simple text object in the app. We can achieve it by using the following code. In the server function we add the <code>output\$my_text</code> object, which is linked to the UI component via the unique identifier string <code>"my_text"</code> as a member of the <code>output</code> argument. Furthermore we use the <code>renderText()</code> function, since we want to display plain text. Here <code>input\$my_slider</code> is used to fetch the number on the slider from the user input.
+The server function brings the output of the app to life by telling Shiny how to perform computations, for example how to fill a plot or a table with data. The full documentation of all the functions can be found [here](https://shiny.rstudio.com/reference/shiny/1.6.0/){target="_blank"}. We will use the <code>input</code> and <code>output</code> arguments of our <code>server()</code> function to pass the elements of our <code>ui</code> object to each other. First consider the slider example from the previous section. Let's say, one would like to display the chosen number as a simple text object in the app. We can achieve this by using the following code. In the server function we add the <code>output\$my_text</code> object, which is linked to the UI component via the unique identifier string <code>"my_text"</code> as a member of the <code>output</code> argument. Furthermore, we use the <code>renderText()</code> function, since we want to display plain text. Here <code>input\$my_slider</code> is used to fetch the number on the slider from the user input.
 
 ```{r, eval=FALSE}
 # Define UI for application. 
@@ -122,7 +122,7 @@ There are two ways to include interactive Shiny elements in a document. You can 
 
 ## Deploying the app
 
-After one has completed the work on an app, the question of how the software can go into production in order to reach the users must be answered. Shiny and RStudio are therefore offering a few solutions. The simplest way of running an R Shiny app is by doing it locally on your own computer. Here, an R and Shiny installation are required. A more common solution is to deploy the Shiny app to the web. The advantages of this option are that one can reach a larger target group and that end users only need a web browser to run the app. Rolling out on a server can be done using the ShinyServer software from RStudio. A Linux server or cloud-based Linux server is required for this. A simpler solution can be achieved via Shinyapps.io, a cloud hosting services by RStudio. This has the advantage that the developer doesn't need to take care of the hardware and the installation of the server. Only the app code needs to be transferred to the Shinyapps.io service. There are different price models for this deploying method - including a free solution. More on this topic can be found [here](https://shiny.rstudio.com/deploy/){target="_blank"}.
+After one has completed the work on an app, the question of how the software can go into production in order to reach the users must be answered. Shiny and RStudio are therefore offering a few solutions. The simplest way of running an R Shiny app is by doing it locally on your own computer. Here, an R and Shiny installation are required. A more common solution is to deploy the Shiny app to the web. The advantages of this option are, that one can reach a larger target group and that end users only need a web browser to run the app. Rolling out on a server can be done using the ShinyServer software from RStudio. A Linux server or cloud-based Linux server is required for this. A simpler solution can be achieved via Shinyapps.io, a cloud hosting services by RStudio. This has the advantage that the developer doesn't need to take care of the hardware and the installation of the server. Only the app code needs to be transferred to the Shinyapps.io service. There are different price models for this deploying method - including a free solution. More on this topic can be found [here](https://shiny.rstudio.com/deploy/){target="_blank"}.
 
 # Examples
 
@@ -147,7 +147,7 @@ ui <- fluidPage(
 ```
 
 After installing and loading the shiny package the UI has to be defined. This includes the  layout and  the interactive elements. In this case  a dropdown menu and sliders.
-The function <code>fluidPage()</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A Fluid page layout is not fixed but scales its components depending on the window size.
+The function <code>fluidPage()</code> is used to create a fluid layout which means that the layout is composed of rows and columns to keep all content in line. A fluid page layout is not fixed but scales its components depending on the window size.
 After determining which layout should be used, the layout can be set.
 
 ```{r, eval=FALSE}
@@ -293,7 +293,7 @@ shinyApp(ui = ui, server = server)
 
 The server logic is required to draw the distribution plots which are shown in the main panel. The plots are generated depending on the input given via the dropdown menu selection and the slider selection. 
 The reactive plots are rendered using <code>rendersPlot()</code>.
-Via an <code>if</code> condition the selection of the  distribution in the dropdown menu is considered. Depending on the selected distribution the different plots are created by determining the range of the x axis and the type of distribution and considering the selected values for the parameters. Furthermore, the color of the graphs and the type of plot are set as well as the description of the $y$- and $x$-axis.
+Via an <code>if</code> condition the selection of the  distribution in the dropdown menu is considered. Depending on the selected distribution the different plots are created by determining the range of the $x$ axis and the type of distribution and considering the selected values for the parameters. Furthermore, the color of the graphs and the type of plot are set as well as the description of the $y$- and $x$-axis.
 Now the UI and also the server logic are defined which means that the app can run. The app can be seen below.
 
 ```{r distr, echo=FALSE,  out.width = '100%'}
@@ -302,7 +302,7 @@ knitr::include_graphics("img/distribution2.jpg")
 knitr::include_graphics("img/distribution3.jpg")
 ```
 
-## Interactive Regression
+## Interactive regression
 
 The application presented in this section is intended to clarify the interactive components in relation to statistical data analysis. The following app can calculate two linear models of the form 
 
@@ -310,7 +310,7 @@ The application presented in this section is intended to clarify the interactive
 y = \textbf{X}\beta + \epsilon
 \end{align*}
 
-for one data set simultaneously. The results can be compared directly. Therefore the _Akaike information criterion (AIC)_ is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a "better" model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions of each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.
+for one data set simultaneously. The results can be compared directly. Therefore the _Akaike information criterion (AIC)_ is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a "better" model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions with each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.
 
 First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostonHousing</code> data set from the <code>mlbench</code> package.
 
