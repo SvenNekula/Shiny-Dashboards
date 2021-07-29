@@ -314,7 +314,7 @@ for one data set simultaneously. The results can be compared directly. Therefore
 
 First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostonHousing</code> data set from the <code>mlbench</code> package.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 # Include shiny.
 if (!require("shiny")) install.packages("shiny")
 library(shiny)
