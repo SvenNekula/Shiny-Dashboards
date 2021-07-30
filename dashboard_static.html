@@ -136,7 +136,7 @@ a.sourceLine {
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Advanced Data Analysis with R: Shiny dashboards.</h1>
 <h3 class="author">Sven Nekula, Minke Preckel, Joshua Simon</h3>
-<h3 class="date">29.07.2021</h3>
+<h3 class="date">30.07.2021</h3>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -172,7 +172,7 @@ a.sourceLine {
 <h1 number="1"><span class="header-section-number">1</span> Introduction - What is Shiny?</h1>
 <p>Shiny is an R package that allows the user to create interactive web apps. Just like other <a href="https://www.rstudio.com/products/rpackages/" target="_blank">popular R packages</a>, including the tidyverse packages, it was created by members of the RStudio team and was first released as version 0.2.3 on December 1st 2012. The most current version is 1.6.0 and was released on January 25th 2021. Further information on the current and past versions can be found <a href="https://www.rdocumentation.org/packages/shiny/versions/1.6.0" target="_blank">here</a>.</p>
 <p>Before the package was released, it was more difficult for R users to create web apps. Either there was the possibility to work with the tcltk package, which was announced in 2001 and is also a graphic user interface (GUI) but with <a href="https://www.r-project.org/conferences/DSC-2001/Proceedings/Dalgaard.pdf" target="”_blank”">different shortcomings</a>, or it required knowledge of HTML, CSS and JavaScript. Furthermore, this required the user to carefully analyze the interaction flows and dependencies of their code to prevent unrelated outputs to change, when some input changes. Shiny solves those problems by providing user interface (UI) functions that generate the needed HTML, CSS and JavaScript, which means that the user doesn’t have to have any knowledge on these, if they don’t want to go beyond the provided basics. It also introduced a new style of programming. <em>Reactive programming</em> keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes <span class="citation">(<a href="#ref-WICKHAM.2021" role="doc-biblioref">Wickham 2021</a>)</span>.</p>
-<p>Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly <span class="citation">(<a href="#ref-WICKHAM.2021" role="doc-biblioref">2021</a>)</span>. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document’s YAML header.</p>
+<p>Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly <span class="citation">(<a href="#ref-WICKHAM.2021" role="doc-biblioref">Wickham 2021</a>)</span>. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document’s YAML header.</p>
 <p>In the first section the structure and functions of shiny apps will be explained. After that, some examples of shiny apps and their respective codes will be presented.</p>
 </div>
 <div id="structure-of-a-shiny-app" class="section level1" number="2">
@@ -315,7 +315,7 @@ a.sourceLine {
 <span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span>,</span>
 <span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        <span class="at">step =</span> <span class="dv">1</span>)</span>
 <span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>The sliders are created with the function <code>conditionalPanel()</code>. Depending on which distribution was chosen in the dropdown menu above, the parameters and their value range vary.</p>
+<p>The sliders are created with the function <code>conditionalPanel()</code>. Depending on which distribution was chosen in the dropdown menu above, the parameters and their value range vary. A deeper look on distributions and their density functions is given in <span class="citation">(<a href="#ref-mood1950introduction" role="doc-biblioref">Mood and Boes 1974</a>)</span>, were the following examples are taken from. A reference for other distributions like the <em>student</em> <span class="math inline">\(t\)</span>-distribution can be found in <span class="citation">(<a href="#ref-bronstein2012taschenbuch" role="doc-biblioref">Bronstein et al. 2020</a>)</span>.</p>
 <p>For the beta-distribution which is defined as follows:</p>
 <p><span class="math display">\[\begin{align*}
 &amp; X \sim {\sf Beta}(\alpha, \beta) \\
@@ -382,7 +382,7 @@ a.sourceLine {
 <p><span class="math display">\[\begin{align*}
 y = \textbf{X}\beta + \epsilon
 \end{align*}\]</span></p>
-<p>for one data set simultaneously. The results can be compared directly. Therefore the <em>Akaike information criterion (AIC)</em> is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a “better” model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions with each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.</p>
+<p>for one data set simultaneously. A formal introduction to linear regression models is given in <span class="citation">(<a href="#ref-fahrmeir2016statistik" role="doc-biblioref">Fahrmeir et al. 2016</a>)</span>. The results can be compared directly. Therefore the <em>Akaike information criterion (AIC)</em> is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a “better” model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions with each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.</p>
 <p>First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostonHousing</code> data set from the <code>mlbench</code> package.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Include shiny.</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(<span class="st">&quot;shiny&quot;</span>)) <span class="fu">install.packages</span>(<span class="st">&quot;shiny&quot;</span>)</span>
@@ -483,7 +483,7 @@ y = \textbf{X}\beta + \epsilon
 <span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plotOutput</span>(<span class="st">&quot;plotPredictions&quot;</span>)</span>
 <span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>Again, the final component is the server function to define the logic of the app. We start by rendering the text output for the AIC values. We use <code>output$modelAIC_1 &lt;- renderText()</code> to wrap the calculation of the linear model. Inside this function the AIC result of the <code>fit</code> object is fetched for the text output. The same procedure can be applied for model two, but now using the input objects for the selection of model two. Finally, the plot is rendered using <code>output$plotPredictions &lt;- renderPlot()</code>. Here, both models are fitted and the return objects for setting up the plots are fetched. The data is plotted as points. To give some more context, spline interpolation is used to fit smooth curves through these points. Therefore the <code>spline()</code> function is used.</p>
+<p>Again, the final component is the server function to define the logic of the app. We start by rendering the text output for the AIC values. We use <code>output$modelAIC_1 &lt;- renderText()</code> to wrap the calculation of the linear model. Inside this function the AIC result of the <code>fit</code> object is fetched for the text output. The same procedure can be applied for model two, but now using the input objects for the selection of model two. Finally, the plot is rendered using <code>output$plotPredictions &lt;- renderPlot()</code>. Here, both models are fitted and the return objects for setting up the plots are fetched. The data is plotted as points. To give some more context, spline interpolation is used to fit smooth curves through these points. Therefore the <code>spline()</code> function is used. More details on polynomial interpolation, especially cubic spline interpolation, and on the numerical approach can be found in <span class="citation">(<a href="#ref-schwarz2013numerische" role="doc-biblioref">Schwarz and Köckler 2013</a>)</span>.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) {</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># AIC output for model 1.</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  output<span class="sc">$</span>modelAIC_1 <span class="ot">&lt;-</span> <span class="fu">renderText</span>({</span>
@@ -1571,8 +1571,20 @@ y = \textbf{X}\beta + \epsilon
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-bronstein2012taschenbuch" class="csl-entry">
+Bronstein, Ilja N, Juraj Hromkovic, Bernd Luderer, Hans-Rudolf Schwarz, Jochen Blath, Alexander Schied, Stephan Dempe, Gert Wanka, and Siegfried Gottwald. 2020. <em>Taschenbuch Der Mathematik</em>. Vol. 11. Springer-Verlag.
+</div>
+<div id="ref-fahrmeir2016statistik" class="csl-entry">
+Fahrmeir, Ludwig, Christian Heumann, Rita Künstler, Iris Pigeot, and Gerhard Tutz. 2016. <em>Statistik: Der Weg Zur Datenanalyse</em>. Springer-Verlag.
+</div>
 <div id="ref-GROLEMUND.2014" class="csl-entry">
 Grolemund, Garett. 2014. <span>“Introduction to Interactive Documents.”</span> <a href="https://shiny.rstudio.com/articles/interactive-docs.html">https://shiny.rstudio.com/articles/interactive-docs.html</a>.
+</div>
+<div id="ref-mood1950introduction" class="csl-entry">
+Mood, Graybill, A. M., and D. C. Boes. 1974. <em>Introduction to the Theory of Statistics.</em> Bosten: McGraw-Hill.
+</div>
+<div id="ref-schwarz2013numerische" class="csl-entry">
+Schwarz, Hans-Rudolf, and Norbert Köckler. 2013. <em>Numerische Mathematik</em>. Springer-Verlag.
 </div>
 <div id="ref-WICKHAM.2021" class="csl-entry">
 Wickham, Hadley. 2021. <em><span class="nocase">Mastering Shiny: Build Interactive Apps, Reports, and Dashboards Powered by R</span></em>. <span>O’Reilly Media</span>.

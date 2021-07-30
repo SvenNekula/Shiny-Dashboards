@@ -23,7 +23,7 @@ Before the package was released, it was more difficult for R users to create web
 Shiny solves those problems by providing user interface (UI) functions that generate the needed HTML, CSS and JavaScript, which means that the user doesn't have to have any knowledge on these, if they don't want to go beyond the provided basics.
 It also introduced a new style of programming. _Reactive programming_ keeps track of the dependencies in the code, which enables Shiny to be able to automatically figure out, how to do most efficiently update the output, if the input changes [@WICKHAM.2021].
 
-Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [-@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
+Shiny is used to create dashboards that replace hundreds of PDFs by allowing the user to immediately jump to the slice of data they are interested in and make it easy to communicate complex models to a nontechnical audience and visualize the data accordingly [@WICKHAM.2021]. Shiny can also be used to create interactive documents such as this one, by adding <code>runtime: shiny</code> in the document's YAML header.
 
 In the first section the structure and functions of shiny apps will be explained. 
 After that, some examples of shiny apps and their respective codes will be presented.
@@ -226,7 +226,7 @@ conditionalPanel(
 )
 ```
 
-The sliders are created with the function <code>conditionalPanel()</code>. Depending on which distribution was chosen in the dropdown menu above, the parameters and their value range vary.
+The sliders are created with the function <code>conditionalPanel()</code>. Depending on which distribution was chosen in the dropdown menu above, the parameters and their value range vary. A deeper look on distributions and their density functions is given in [@mood1950introduction], were the following examples are taken from. A reference for other distributions like the _student_ $t$-distribution can be found in [@bronstein2012taschenbuch].
 
 For the beta-distribution which is defined as follows:
 
@@ -424,7 +424,7 @@ The application presented in this section is intended to clarify the interactive
 y = \textbf{X}\beta + \epsilon
 \end{align*}
 
-for one data set simultaneously. The results can be compared directly. Therefore the _Akaike information criterion (AIC)_ is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a "better" model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions with each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.
+for one data set simultaneously. A formal introduction to linear regression models is given in [@fahrmeir2016statistik]. The results can be compared directly. Therefore the _Akaike information criterion (AIC)_ is calculated for each of the two models. The model specification can be changed at any time. So the AIC is an indicator, if the new specification yields a "better" model. Here, the model with the lowest AIC value is considered to be the best model. Another interesting view on model selection is provided by the plot in the app. This more machine-learning-like approach takes a partition of the data set, also called a test set, to calculate predictions with the fitted models. These predictions can be compared to the true test values. The train/test split rate can also be controlled in the app. This gives us some insight on how good we can make true predictions with each of the two models. Note that the models are fitted (trained) with the other partition of the initial data set, the so called training data set. In the following part of this section we will present the code and the app itself.
 
 First, we need to include the packages for our interactive regression app. As an example data set we use the <code>BostonHousing</code> data set from the <code>mlbench</code> package.
 
@@ -539,7 +539,7 @@ ui <- fluidPage(
 )
 ```
 
-Again, the final component is the server function to define the logic of the app. We start by rendering the text output for the AIC values. We use <code>output\$modelAIC_1 <- renderText()</code> to wrap the calculation of the linear model. Inside this function the AIC result of the <code>fit</code> object is fetched for the text output. The same procedure can be applied for model two, but now using the input objects for the selection of model two. Finally, the plot is rendered using <code>output\$plotPredictions <- renderPlot()</code>. Here, both models are fitted and the return objects for setting up the plots are fetched. The data is plotted as points. To give some more context, spline interpolation is used to fit smooth curves through these points. Therefore the <code>spline()</code> function is used. 
+Again, the final component is the server function to define the logic of the app. We start by rendering the text output for the AIC values. We use <code>output\$modelAIC_1 <- renderText()</code> to wrap the calculation of the linear model. Inside this function the AIC result of the <code>fit</code> object is fetched for the text output. The same procedure can be applied for model two, but now using the input objects for the selection of model two. Finally, the plot is rendered using <code>output\$plotPredictions <- renderPlot()</code>. Here, both models are fitted and the return objects for setting up the plots are fetched. The data is plotted as points. To give some more context, spline interpolation is used to fit smooth curves through these points. Therefore the <code>spline()</code> function is used. More details on polynomial interpolation, especially cubic spline interpolation, and on the numerical approach can be found in [@schwarz2013numerische].
 
 ```{r, eval=FALSE}
 server <- function(input, output, session) {
